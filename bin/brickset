@@ -1,0 +1,185 @@
+#! /usr/bin/env python
+
+import argparse
+import os
+
+import config
+import minifigs
+import sets
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        prog='brickset', version='brickset 0.1.0', epilog='for more detail, use: man brickset'
+    )
+
+    subparsers = parser.add_subparsers(help='sub-command help', dest='subcommand')
+
+    # ------------------------------------------
+    # CONFIGURE
+    # ------------------------------------------
+    config_parser = subparsers.add_parser('config', help='configure brickset', description='configure brickset')
+    config_parser.add_argument('api_key', help='Bricket API key')
+    config_parser.set_defaults(func=config.configure)
+
+    # ------------------------------------------
+    # LOGIN
+    # ------------------------------------------
+    login_parser = subparsers.add_parser(
+        'login', help='log in and retrieve user hash', description='log in and retrieve user hash'
+    )
+    login_parser.set_defaults(func=config.log_in)
+
+    # ------------------------------------------
+    # USAGE
+    # ------------------------------------------
+    usage_parser = subparsers.add_parser('usage', help='show API key usage', description='show API key usage')
+    usage_parser_group = usage_parser.add_mutually_exclusive_group()
+    usage_parser_group.add_argument(
+        '--today', '-t', action='store_const', const='TODAY', dest='mode', default='TODAY', help='show all usage info'
+    )
+    usage_parser_group.add_argument(
+        '--all', '-a', action='store_const', const='ALL', dest='mode', help='show all usage info'
+    )
+    usage_parser_group.add_argument(
+        '--last',
+        '-l',
+        action='store_const',
+        const='LAST',
+        dest='mode',
+        help='always show the most recent day even if not today'
+    )
+    usage_parser.set_defaults(func=config.show_usage)
+
+    # ------------------------------------------
+    # SETS
+    # ------------------------------------------
+    sets_parser = subparsers.add_parser('sets', help='get sets', description='get sets')
+
+    # TODO: require one filtering parameter
+    identifier_group = sets_parser.add_mutually_exclusive_group()
+    identifier_group.add_argument('--id', help='Brickset ID')
+    identifier_group.add_argument('--set-number', '--number', nargs='+', help='Set number')
+    sets_parser.add_argument('--query', '-q', help='query set number, name, theme and subtheme')
+    sets_parser.add_argument('--theme', nargs='+', help='Set theme')
+    sets_parser.add_argument('--subtheme', help='Set subtheme')
+    sets_parser.add_argument('--year', nargs='+', help='Set year')
+    sets_parser.add_argument('--tag', help='Set tag')
+    collection_group = sets_parser.add_mutually_exclusive_group()
+    collection_group.add_argument('--owned', action='store_true', help='Owned sets')
+    collection_group.add_argument('--wanted', action='store_true', help='Wanted sets')
+    sets_parser.add_argument('--updated-since', help='Update since')
+
+    # result formatting
+    sets_parser.add_argument('--limit', '-l', '-n', help='Limit returned results to n', default=20)
+    sets_parser.add_argument('--order-by', help='Order sets by')
+    details_group = sets_parser.add_mutually_exclusive_group()
+    details_group.add_argument('--extended', action='store_true', help='Included extended fields')
+    details_group.add_argument('--id-only', action='store_true', help='Only print Brickset IDs')
+    details_group.add_argument(
+        '--count', '-c', action='store_true', help='Only return the total number of matching sets'
+    )
+
+    sets_parser.set_defaults(func=sets.get_sets)
+
+    # ------------------------------------------
+    # MINIFIGS
+    # ------------------------------------------
+    minifig_parser = subparsers.add_parser('minifigs', help='get minifigs', description='get minifigs')
+    minifig_parser.add_argument('--owned', '-o', action='store_true', help='Include owned minifigs')
+    minifig_parser.add_argument('--wanted', '-w', action='store_true', help='Include wanted minifigs')
+    minifig_parser.add_argument('--query', '-q', help='Query by minifig name or number')
+    # TODO: at least one filter is required
+    minifig_parser.set_defaults(func=minifigs.get_minifigs)
+
+    # ------------------------------------------
+    # INSTRUCTIONS
+    # ------------------------------------------
+    instructions_parser = subparsers.add_parser('instructions', help='get instructions', description='get instructions')
+    identifier_group = instructions_parser.add_mutually_exclusive_group()
+    identifier_group.add_argument('--id', nargs='+', help='Brickset ID')
+    identifier_group.add_argument('--set-number', '--number', nargs='+', help='Set number')
+    # instructions_parser.add_argument('id', nargs='+', help='Brickset ID')
+    instructions_parser.set_defaults(func=sets.get_instructions)
+    instructions_parser.add_argument(
+        '--download',
+        '-d',
+        nargs='?',
+        default=None,
+        const=os.getcwd(),
+        dest='directory',
+        help='download instructions'
+    )
+
+    # ------------------------------------------
+    # THEMES
+    # ------------------------------------------
+    themes_parser = subparsers.add_parser('themes', help='get themes', description='get themes')
+    themes_parser.add_argument('theme', help='regex pattern to match against theme names', nargs='?', metavar='THEME')
+    themes_parser.set_defaults(func=sets.get_themes)
+
+    # ------------------------------------------
+    # SUBTHEMES
+    # ------------------------------------------
+    subthemes_parser = subparsers.add_parser('subthemes', help='get subthemes', description='get subthemes')
+    subthemes_parser.add_argument('theme', help='LEGO theme', metavar='THEME')
+    subthemes_parser.add_argument(
+        'subtheme', help='regex pattern to match against subtheme names', nargs='?', metavar='SUBTHEME'
+    )
+    subthemes_parser.set_defaults(func=sets.get_subthemes)
+
+    # ------------------------------------------
+    # YEARS
+    # ------------------------------------------
+    year_parser = subparsers.add_parser('years', help='get set count by year', description='get set count by year')
+    year_parser.add_argument('theme', help='LEGO theme', metavar='THEME')
+    year_parser.set_defaults(func=sets.get_years)
+
+    # ------------------------------------------
+    # NOTES
+    # ------------------------------------------
+    # TODO: getUserNotes
+
+    # ------------------------------------------
+    # COLLECTION
+    # ------------------------------------------
+    collection_parser = subparsers.add_parser('collection', help='view/manage a collection', description='view/manage a collection')
+    extensions_subparsers = collection_parser.add_subparsers(help='collection sub-command help', dest='collection_subcommand')
+    collection_sets_parser = extensions_subparsers.add_parser(
+        'sets',
+        help='manage a collection set',
+        description='manage a collection set',
+        usage='''brickset collection sets TODO'''
+    )
+    collection_sets_parser.add_argument('id', help='Brickset ID', metavar='ID')
+    # TODO require at least one flag
+    collection_sets_parser.add_argument(
+        '--owned', '-o', nargs='?', default=None, const=1, help='quantity owned'
+    )
+    wanted_parser = collection_sets_parser.add_mutually_exclusive_group()
+    wanted_parser.add_argument('--wanted', '-w', action='store_true', default=None, help='set wanted')
+    wanted_parser.add_argument('--not-wanted', '-W', action='store_false', dest='wanted', help='set not wanted')
+    collection_sets_parser.add_argument('--notes', '-n', help='set notes')
+    collection_sets_parser.add_argument('--rating', '-r', help='set rating')  # TODO: validate 1-5 (0?)
+    collection_sets_parser.set_defaults(func=sets.update_set)
+
+    collection_minifigs_parser = extensions_subparsers.add_parser(
+        'minifigs',
+        help='manage a collection minifig',
+        description='manage a collection minifig',
+        usage='''brickset collection minifigs TODO'''
+    )
+    collection_minifigs_parser.add_argument('id', help='Brickset minifig number', metavar='MINIFIG_NUMBER')
+    # TODO require at least one flag
+    collection_minifigs_parser.add_argument(
+        '--owned', '-o', nargs='?', default=None, const=1, help='quantity owned'
+    )
+    wanted_parser = collection_minifigs_parser.add_mutually_exclusive_group()
+    wanted_parser.add_argument('--wanted', '-w', action='store_true', default=None, help='set wanted')
+    wanted_parser.add_argument('--not-wanted', '-W', action='store_false', dest='wanted', help='set not wanted')
+    collection_minifigs_parser.set_defaults(func=minifigs.update_minifig)
+
+    parsed_args = vars(parser.parse_args())
+    func = parsed_args.pop('func')
+    parsed_args.pop('subcommand', None)
+    parsed_args.pop('collection_subcommand', None)
+    func(**parsed_args)
