@@ -139,6 +139,12 @@ def get_instructions(id, directory, set_number=None):
     set_numbers = set_number if set_number is not None else _id_to_set_number_generator(id)
     # for set_id in ids:
     for set_id, cur_set_number in zip(ids, set_numbers):
+        if not set_id:
+            print('No instructions found for set number {}'.format(cur_set_number))
+            continue
+        if not cur_set_number:
+            print('No instructions found for set ID {}'.format(set_id))
+            continue
         # getting the set number will increase key usage and may result in hitting the API limit
         # cur_set_number = set_number if set_number is not None else _get_set_number(set_id)
         instructions_json = api.execute_api_request('getInstructions', setID=set_id)
@@ -220,7 +226,7 @@ def _get_set_number(set_id):
     if set_id not in cache['sets']:
         sets_json = api.execute_api_request('getSets', include_hash=True, params={'setID': set_id})
         config.update_cache(sets_json['sets'])
-    return cache['sets'][set_id]
+    return cache['sets'].get(set_id, None)
 
 
 def _get_id(set_number):
@@ -228,7 +234,7 @@ def _get_id(set_number):
     if set_number not in cache['sets']:
         sets_json = api.execute_api_request('getSets', include_hash=True, params={'setNumber': set_number})
         cache = config.update_cache(sets_json['sets'], cache)
-    return cache['sets'][set_number]
+    return cache['sets'].get(set_number, None)
 
 
 def _print_instruction(set_number, instruction):

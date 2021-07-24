@@ -32,6 +32,10 @@ def execute_api_request(api, include_hash=False, **kwargs):
 def download_instruction(directory, set_number, instruction):
     url = instruction['URL']
     filename = _construct_instruction_filename(set_number, instruction['description'], url)
+    if not filename:
+        print 'WARN: Skipping unknown instruction URL format: {}'.format(url)
+        return
+
     print 'Downloading', '"{}"'.format(instruction['description']), instruction['URL'], 'as', filename
     r = requests.get(url)
     with open('{}/{}'.format(directory, filename), 'wb') as f:
@@ -41,6 +45,8 @@ def download_instruction(directory, set_number, instruction):
 def _construct_instruction_filename(set_number, instruction_description, instruction_url):
     # match = re.compile('https://www\.lego\.com/biassets/bi/(\d+)\.pdf').match(instruction_url)
     match = re.compile('https://www\.lego\.com.*?/(\d+)\.pdf').match(instruction_url)
+    if not match:
+        return None
     pdf_number = match.group(1)
 
     # NO DESCRIPTION
