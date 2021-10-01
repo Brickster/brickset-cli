@@ -42,12 +42,25 @@ def download_instruction(directory, set_number, instruction):
         f.write(r.content)
 
 
+def _parse_pdf_number(instruction_url):
+    match = re.compile('^https://www\.lego\.com.*/(.*)\.pdf$').match(instruction_url)
+    if match:
+        pdf_name = match.group(1).lower()
+
+        # just a number
+        match = re.compile('^\d+$').match(pdf_name)
+        if match:
+            return pdf_name
+
+        # main build
+        match = re.compile('^(\d+)_(\d+)_build_main$').match(pdf_name)
+        if match:
+            return match.group(1) + match.group(2)
+    return None
+
+
 def _construct_instruction_filename(set_number, instruction_description, instruction_url):
-    # match = re.compile('https://www\.lego\.com/biassets/bi/(\d+)\.pdf').match(instruction_url)
-    match = re.compile('https://www\.lego\.com.*?/(\d+)\.pdf').match(instruction_url)
-    if not match:
-        return None
-    pdf_number = match.group(1)
+    pdf_number = _parse_pdf_number(instruction_url)
 
     # NO DESCRIPTION
     if instruction_description == '{No longer listed at LEGO.com}':
@@ -92,10 +105,17 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
         book = match.group(1)
         return '{}_b{}_{}.pdf'.format(set_number, book, pdf_number)
 
+    # BUILD MAIN
+    match = re.compile('^\d+_\d+_build_main$', flags=re.IGNORECASE).match(instruction_description)
+    if match:
+        return '{}_{}.pdf'.format(set_number, pdf_number)
+
     # OTHER
     match = re.compile('^(?:BI|BUI?LDING\s*INSTRUCTION).*?[\s-]+(\d+)$').match(instruction_description)
     if match:
         return '{}_{}.pdf'.format(set_number, pdf_number)
+
+    return None
 
 
 def _clean_region(region_to_clean):
