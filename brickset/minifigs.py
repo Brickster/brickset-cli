@@ -4,17 +4,6 @@ from . import api
 
 
 def get_minifigs(owned, wanted, query):
-    # {"status":"success","matches":576,"minifigs":[
-    #   {
-    #     "minifigNumber": "47205pb025",
-    #     "name": "Duplo Figure Lego Ville, Child Boy, Blue Legs, White Top with Blue Overalls, Lime Cap, Freckles",
-    #     "category": "Duplo / General",
-    #     "ownedInSets": 1,
-    #     "ownedLoose": 0,
-    #     "ownedTotal": 1,
-    #     "wanted": false
-    #   }
-    # print('get_minifigs: owned={}, wanted={}, query={}'.format(owned, wanted, query))
     params = {}
     if owned:
         params['owned'] = 1
@@ -28,4 +17,4 @@ def get_minifigs(owned, wanted, query):
 
 
 def update_minifig(id, owned, wanted):
-    print('update_minifig: id={} owned={}, wanted={}'.format(id, owned, wanted))
+    print('TODO: update_minifig: id={} owned={}, wanted={}'.format(id, owned, wanted))
