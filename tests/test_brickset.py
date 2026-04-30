@@ -1,12 +1,12 @@
+import os
 import subprocess
 import unittest
+
+_BIN = os.path.join(os.path.dirname(__file__), '..', 'bin', 'brickset')
 
 
 class TestBrickset(unittest.TestCase):
 
   def test_help(self):
-    # when
-    abandon_output = subprocess.check_output('../bin/brickset -h'.split())
-
-    # then
-    self.assertTrue(abandon_output.startswith('usage: brickset'))
+    help_output = subprocess.check_output([_BIN, '-h'], text=True)
+    self.assertTrue(help_output.startswith('usage: brickset'))
