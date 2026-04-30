@@ -18,3 +18,10 @@ $ brickset config YOUR_API_KEY
 $ brickset login
 # prompted for username/password to retrieve a user hash
 ```
+
+## Running tests
+
+```commandline
+$ pip install -r requirements-test.txt
+$ nosetests tests/
+```
