@@ -18,41 +18,32 @@ class TestSets(unittest.TestCase):
         )
         mock_api.assert_called_once_with('getSets', include_hash=True, params={'query': 'star wars', 'pageSize': 20})
 
-    @mock.patch('brickset.sets.config.update_cache')
-    @mock.patch('brickset.api.execute_api_request')
-    @mock.patch('sys.exit')
-    def test_getSets_whenUpdatedSinceIsInvalid(self, mock_exit, mock_api, mock_update_cache):
-        mock_api.return_value = {'sets': [], 'matches': 0}
-        sets.get_sets(
-            query=None, id=None, set_number=None, theme=None, subtheme=None,
-            year=None, tag=None, owned=False, wanted=False, updated_since='not-a-date',
-            limit=20, order_by=None, extended=False, id_only=False, count=False
-        )
-        mock_exit.assert_called_once_with('ERROR: updated_since must have format yyyy-MM-dd')
+    def test_getSets_whenUpdatedSinceIsInvalid(self):
+        with self.assertRaises(SystemExit) as cm:
+            sets.get_sets(
+                query=None, id=None, set_number=None, theme=None, subtheme=None,
+                year=None, tag=None, owned=False, wanted=False, updated_since='not-a-date',
+                limit=20, order_by=None, extended=False, id_only=False, count=False
+            )
+        self.assertEqual('ERROR: updated_since must have format yyyy-MM-dd', cm.exception.code)
 
-    @mock.patch('brickset.sets.config.update_cache')
-    @mock.patch('brickset.api.execute_api_request')
-    @mock.patch('sys.exit')
-    def test_getSets_whenOrderByIsInvalid(self, mock_exit, mock_api, mock_update_cache):
-        mock_api.return_value = {'sets': [], 'matches': 0}
-        sets.get_sets(
-            query=None, id=None, set_number=None, theme=None, subtheme=None,
-            year=None, tag=None, owned=False, wanted=False, updated_since=None,
-            limit=20, order_by='Invalid', extended=False, id_only=False, count=False
-        )
-        mock_exit.assert_called_once_with('ERROR: invalid sort option')
+    def test_getSets_whenOrderByIsInvalid(self):
+        with self.assertRaises(SystemExit) as cm:
+            sets.get_sets(
+                query=None, id=None, set_number=None, theme=None, subtheme=None,
+                year=None, tag=None, owned=False, wanted=False, updated_since=None,
+                limit=20, order_by='Invalid', extended=False, id_only=False, count=False
+            )
+        self.assertEqual('ERROR: invalid sort option', cm.exception.code)
 
-    @mock.patch('brickset.sets.config.update_cache')
-    @mock.patch('brickset.api.execute_api_request')
-    @mock.patch('sys.exit')
-    def test_getSets_whenLimitIsInvalid(self, mock_exit, mock_api, mock_update_cache):
-        mock_api.return_value = {'sets': [], 'matches': 0}
-        sets.get_sets(
-            query=None, id=None, set_number=None, theme=None, subtheme=None,
-            year=None, tag=None, owned=False, wanted=False, updated_since=None,
-            limit=501, order_by=None, extended=False, id_only=False, count=False
-        )
-        mock_exit.assert_called_once_with('ERROR: limit must be between 1 and 500')
+    def test_getSets_whenLimitIsInvalid(self):
+        with self.assertRaises(SystemExit) as cm:
+            sets.get_sets(
+                query=None, id=None, set_number=None, theme=None, subtheme=None,
+                year=None, tag=None, owned=False, wanted=False, updated_since=None,
+                limit=501, order_by=None, extended=False, id_only=False, count=False
+            )
+        self.assertEqual('ERROR: limit must be between 1 and 500', cm.exception.code)
 
     @mock.patch('brickset.sets.config.update_cache')
     @mock.patch('builtins.print')
@@ -290,28 +281,28 @@ class TestSets(unittest.TestCase):
         self.assertTrue(sets._is_valid_limit(20))
         self.assertTrue(sets._is_valid_limit(500))
 
-    @mock.patch('sys.exit')
-    def test__isValidLimit_whenAboveMax(self, mock_exit):
-        sets._is_valid_limit(501)
-        mock_exit.assert_called_once_with('ERROR: limit must be between 1 and 500')
+    def test__isValidLimit_whenAboveMax(self):
+        with self.assertRaises(SystemExit) as cm:
+            sets._is_valid_limit(501)
+        self.assertEqual('ERROR: limit must be between 1 and 500', cm.exception.code)
 
-    @mock.patch('sys.exit')
-    def test__isValidLimit_whenBelowMin(self, mock_exit):
-        sets._is_valid_limit(0)
-        mock_exit.assert_called_once_with('ERROR: limit must be between 1 and 500')
+    def test__isValidLimit_whenBelowMin(self):
+        with self.assertRaises(SystemExit) as cm:
+            sets._is_valid_limit(0)
+        self.assertEqual('ERROR: limit must be between 1 and 500', cm.exception.code)
 
-    @mock.patch('sys.exit')
-    def test__isValidLimit_whenNotAnInteger(self, mock_exit):
-        sets._is_valid_limit('abc')
-        mock_exit.assert_called_once_with('ERROR: limit must be an integer')
+    def test__isValidLimit_whenNotAnInteger(self):
+        with self.assertRaises(SystemExit) as cm:
+            sets._is_valid_limit('abc')
+        self.assertEqual('ERROR: limit must be an integer', cm.exception.code)
 
     def test__isIso8601Date_whenValid(self):
         self.assertTrue(sets._is_iso8601_date('2020-05-05'))
 
-    @mock.patch('sys.exit')
-    def test__isIso8601Date_whenInvalid(self, mock_exit):
-        sets._is_iso8601_date('May 5, 2020')
-        mock_exit.assert_called_once_with('ERROR: updated_since must have format yyyy-MM-dd')
+    def test__isIso8601Date_whenInvalid(self):
+        with self.assertRaises(SystemExit) as cm:
+            sets._is_iso8601_date('May 5, 2020')
+        self.assertEqual('ERROR: updated_since must have format yyyy-MM-dd', cm.exception.code)
 
     @mock.patch('builtins.print')
     def test__printSet(self, mock_print):
@@ -334,10 +325,10 @@ class TestSets(unittest.TestCase):
         self.assertTrue(sets._is_valid_order_by('YearFromDESC'))
         self.assertTrue(sets._is_valid_order_by('yearfromdesc'))
 
-    @mock.patch('sys.exit')
-    def test__isValidOrderBy_whenInvalid(self, mock_exit):
-        sets._is_valid_order_by('ThemeDESC')
-        mock_exit.assert_called_once_with('ERROR: invalid sort option')
+    def test__isValidOrderBy_whenInvalid(self):
+        with self.assertRaises(SystemExit) as cm:
+            sets._is_valid_order_by('ThemeDESC')
+        self.assertEqual('ERROR: invalid sort option', cm.exception.code)
 
     @mock.patch('builtins.print')
     def test__printInstruction(self, mock_print):

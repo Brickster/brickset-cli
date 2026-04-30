@@ -15,11 +15,11 @@ class TestConfig(unittest.TestCase):
             result = config.get_config()
         self.assertEqual({'api_key': 'abc123'}, result)
 
-    @mock.patch('sys.exit')
     @mock.patch('os.path.exists', return_value=False)
-    def test_getConfig_whenNoConfigExists(self, mock_exists, mock_exit):
-        config.get_config()
-        mock_exit.assert_called_once_with('ERROR: no config exists. Run: brickset config API_KEY')
+    def test_getConfig_whenNoConfigExists(self, mock_exists):
+        with self.assertRaises(SystemExit) as cm:
+            config.get_config()
+        self.assertEqual('ERROR: no config exists. Run: brickset config API_KEY', cm.exception.code)
 
     @mock.patch('os.path.exists', return_value=True)
     def test_configure(self, mock_exists):
