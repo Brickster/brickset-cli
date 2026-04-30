@@ -1,16 +1,97 @@
 import unittest
+from unittest import mock
 
 from parameterized import parameterized
 
 from brickset import api
 
+
 class TestApi(unittest.TestCase):
 
-    def test_executeApiRequest(self):
-        self.fail()
+    @mock.patch('brickset.api.requests.get')
+    @mock.patch('brickset.api.config.get_config', return_value={'api_key': 'test-key'})
+    def test_executeApiRequest(self, mock_config, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {'status': 'success', 'sets': []}
 
-    def test_downloadInstruction(self):
-        self.fail()
+        result = api.execute_api_request('getSets')
+
+        mock_get.assert_called_once_with(
+            'https://brickset.com/api/v3.asmx/getSets',
+            params={'apiKey': 'test-key'}
+        )
+        self.assertEqual({'status': 'success', 'sets': []}, result)
+
+    @mock.patch('brickset.api.requests.get')
+    @mock.patch('brickset.api.config.get_config', return_value={'api_key': 'test-key', 'hash': 'user-hash'})
+    def test_executeApiRequest_withHash(self, mock_config, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {'status': 'success', 'sets': []}
+
+        api.execute_api_request('getSets', include_hash=True)
+
+        mock_get.assert_called_once_with(
+            'https://brickset.com/api/v3.asmx/getSets',
+            params={'apiKey': 'test-key', 'userHash': 'user-hash'}
+        )
+
+    @mock.patch('brickset.api.config.get_config', return_value={'api_key': 'test-key'})
+    def test_executeApiRequest_whenHashRequiredButMissing(self, mock_config):
+        with self.assertRaises(SystemExit) as cm:
+            api.execute_api_request('getSets', include_hash=True)
+        self.assertEqual('ERROR: user hash required. Run: brickset login', cm.exception.code)
+
+    @mock.patch('brickset.api.requests.get')
+    @mock.patch('brickset.api.config.get_config', return_value={'api_key': 'test-key'})
+    def test_executeApiRequest_whenNon200Response(self, mock_config, mock_get):
+        mock_get.return_value.status_code = 500
+        mock_get.return_value.text = 'Internal Server Error'
+
+        with self.assertRaises(SystemExit) as cm:
+            api.execute_api_request('getSets')
+        self.assertEqual('ERROR: getSets API returned an unexpected error', cm.exception.code)
+
+    @mock.patch('brickset.api.requests.get')
+    @mock.patch('brickset.api.config.get_config', return_value={'api_key': 'test-key'})
+    def test_executeApiRequest_whenErrorStatus(self, mock_config, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {'status': 'error', 'message': 'Invalid key'}
+        mock_get.return_value.text = '{"status": "error", "message": "Invalid key"}'
+
+        with self.assertRaises(SystemExit) as cm:
+            api.execute_api_request('getSets')
+        self.assertEqual('ERROR: getSets API returned an unexpected error', cm.exception.code)
+
+    @mock.patch('brickset.api.requests.get')
+    @mock.patch('builtins.print')
+    def test_downloadInstruction(self, mock_print, mock_get):
+        mock_get.return_value.content = b'pdf content'
+        instruction = {
+            'URL': 'https://www.lego.com/cdn/5678.pdf',
+            'description': 'BI 3017 / 32 - 70704 V39'
+        }
+
+        with mock.patch('builtins.open', mock.mock_open()) as mock_open:
+            api.download_instruction('/tmp', '1234-1', instruction)
+
+        mock_get.assert_called_once_with('https://www.lego.com/cdn/5678.pdf')
+        mock_print.assert_called_once_with(
+            'Downloading "BI 3017 / 32 - 70704 V39" https://www.lego.com/cdn/5678.pdf as 1234-1_v39_5678.pdf'
+        )
+        mock_open.assert_called_once_with('/tmp/1234-1_v39_5678.pdf', 'wb')
+
+    @mock.patch('builtins.print')
+    def test_downloadInstruction_whenUnknownFormat(self, mock_print):
+        instruction = {
+            'URL': 'https://www.lego.com/cdn/5678.pdf',
+            'description': 'Unknown Format'
+        }
+
+        api.download_instruction('/tmp', '1234-1', instruction)
+
+        mock_print.assert_called_once_with(
+            'WARN: Skipping unknown instruction URL format: https://www.lego.com/cdn/5678.pdf'
+        )
 
     @parameterized.expand([
         ['noDescription0', '{No longer listed at LEGO.com}', '5678.pdf', '1234-1_5678.pdf'],
@@ -142,10 +223,21 @@ class TestApi(unittest.TestCase):
         ['buildingInstructions8', 'BULDING INSTRUCTION, 8593', '5678.pdf', '1234-1_5678.pdf'],
         ['buildingInstructions9', 'BULDINGINSTRUCTION, 8596', '5678.pdf', '1234-1_5678.pdf'],
         ['setNumber0', '60303_01_Build_Main', '60303_01_Build_Main.pdf', '1234-1_6030301.pdf'],
-        ['setNUmber1', '51515_Tricky', '51515_Tricky.pdf', '51515-1_2bed0596.pdf']
+        ['setNumber1', '51515_Tricky', '51515_Tricky.pdf', '1234-1_2bed0596.pdf']
     ])
     def test__constructInstructionFilename(self, name, instruction_description, cdn_filename, expected):
         self.assertEquals(api._construct_instruction_filename('1234-1', instruction_description, 'https://www.lego.com/cdn/' + cdn_filename), expected)
 
-    def test__cleanRegion(self):
-        self.fail()
+    @parameterized.expand([
+        ['simple',          'V39',          'v39'],
+        ['withDot',         'V.39',         'v39'],
+        ['withSpace',       'V 39',         'v39'],
+        ['region',          'IN',           'in'],
+        ['multiVersion',    'V29/39',       'v29_v39'],
+        ['multiVersionV',   'V29/V39',      'v29_v39'],
+        ['tripleVersion',   'V39/46/110',   'v39_v46_v110'],
+        ['leadingSlash',    'V/39/46/110',  'v39_v46_v110'],
+        ['ampersand',       'V39 & V142',   'v39_v142'],
+    ])
+    def test__cleanRegion(self, name, region, expected):
+        self.assertEqual(expected, api._clean_region(region))
