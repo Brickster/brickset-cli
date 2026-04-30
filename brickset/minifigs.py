@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import api
+from . import api
 
 
 def get_minifigs(owned, wanted, query):

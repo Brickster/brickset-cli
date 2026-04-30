@@ -3,7 +3,7 @@ import re
 import requests
 import sys
 
-import config
+from . import config
 
 _API = 'https://brickset.com/api/v3.asmx'
 

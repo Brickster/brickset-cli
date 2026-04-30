@@ -2,7 +2,7 @@ import unittest
 
 from parameterized import parameterized
 
-from bin import api
+from brickset import api
 
 class TestApi(unittest.TestCase):
 

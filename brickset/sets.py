@@ -3,8 +3,8 @@ from __future__ import print_function
 import re
 import sys
 
-import api
-import config
+from . import api
+from . import config
 
 _VALID_SORTS = [
     'Number',

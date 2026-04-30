@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytz
 
-import api
+from . import api
 
 _BRICKSET_DIRECTORY = '.brickset'
 _CONFIG_FILENAME = 'config'

@@ -2,10 +2,13 @@
 
 import argparse
 import os
+import sys
 
-import config
-import minifigs
-import sets
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from brickset import config
+from brickset import minifigs
+from brickset import sets
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='brickset', epilog='for more detail, use: man brickset')
