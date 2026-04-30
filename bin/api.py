@@ -1,3 +1,4 @@
+import hashlib
 import re
 import requests
 import sys
@@ -14,16 +15,16 @@ def execute_api_request(api, include_hash=False, **kwargs):
         if 'hash' not in brickset_config:
             sys.exit('ERROR: user hash required. Run: brickset login')
         params['userHash'] = brickset_config['hash']
-    for key, value in kwargs.iteritems():
+    for key, value in iter(kwargs.items()):
         params[key] = str(value)  # important when value='params' but str everything anyway
 
     response = requests.get(_API + '/' + api, params=params)
     if response.status_code != 200:
-        print response.text
+        print(response.text)
         sys.exit('ERROR: {} API returned an unexpected error'.format(api))
     response_json = response.json()
     if response_json['status'] != 'success':
-        print response.text
+        print(response.text)
         sys.exit('ERROR: {} API returned an unexpected error'.format(api))
 
     return response_json
@@ -33,10 +34,10 @@ def download_instruction(directory, set_number, instruction):
     url = instruction['URL']
     filename = _construct_instruction_filename(set_number, instruction['description'], url)
     if not filename:
-        print 'WARN: Skipping unknown instruction URL format: {}'.format(url)
+        print('WARN: Skipping unknown instruction URL format: {}'.format(url))
         return
 
-    print 'Downloading', '"{}"'.format(instruction['description']), instruction['URL'], 'as', filename
+    print('Downloading "{}" {} as {}'.format(instruction['description'], instruction['URL'], filename))
     r = requests.get(url)
     with open('{}/{}'.format(directory, filename), 'wb') as f:
         f.write(r.content)
@@ -109,6 +110,11 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
     match = re.compile('^\d+_\d+_build_main$', flags=re.IGNORECASE).match(instruction_description)
     if match:
         return '{}_{}.pdf'.format(set_number, pdf_number)
+
+    # Set number and short description
+    match = re.compile('\d+_[a-z]+', flags=re.IGNORECASE).match(instruction_description)
+    if match:
+        return '{}_{}.pdf'.format(set_number, hashlib.sha256(bytes(instruction_description.encode('utf-8'))).hexdigest()[0:8])
 
     # OTHER
     match = re.compile('^(?:BI|BUI?LDING\s*INSTRUCTION).*?[\s-]+(\d+)$').match(instruction_description)

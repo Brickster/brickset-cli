@@ -207,7 +207,7 @@ def _print_set(lego_set, id_only):
         lego_set['number'],
         lego_set['numberVariant'],
         lego_set['setID'],
-        lego_set['name'].encode('UTF-8')
+        lego_set['name']
     )
     if collection_details:
         set_details = set_details + ' (' + ', '.join(collection_details) + ')'

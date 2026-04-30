@@ -37,20 +37,20 @@ def show_usage(mode):
     usage_json = api.execute_api_request('getKeyUsageStats')
     if mode == 'ALL':
         for usage_day in usage_json['apiKeyUsage']:
-            print '{}: {}'.format(usage_day['dateStamp'], usage_day['count'])
+            print('{}: {}'.format(usage_day['dateStamp'], usage_day['count']))
     else:
         if len(usage_json['apiKeyUsage']) > 0:
             last_usage_date = usage_json['apiKeyUsage'][0]['dateStamp']
             # the usage limits actually rollover in BST, not UTC
             today = datetime.now(tz=pytz.timezone('Europe/London')).strftime('%Y-%m-%dT00:00:00Z')
             if mode == 'LAST' or last_usage_date == today:
-                print '{}: {}'.format(last_usage_date, usage_json['apiKeyUsage'][0]['count'])
+                print('{}: {}'.format(last_usage_date, usage_json['apiKeyUsage'][0]['count']))
             else:
-                print '{}: {}'.format(today, 0)
+                print('{}: {}'.format(today, 0))
 
 
 def log_in():
-    username = raw_input('Username: ')
+    username = input('Username: ')
     password = getpass.getpass('Password (only used to retrieve user hash): ')
 
     brickset_config = get_config()

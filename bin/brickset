@@ -8,9 +8,8 @@ import minifigs
 import sets
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        prog='brickset', version='brickset 0.1.0', epilog='for more detail, use: man brickset'
-    )
+    parser = argparse.ArgumentParser(prog='brickset', epilog='for more detail, use: man brickset')
+    parser.add_argument('-v', '--version', action='version', version='brickset 0.1.0')
 
     subparsers = parser.add_subparsers(help='sub-command help', dest='subcommand')
 

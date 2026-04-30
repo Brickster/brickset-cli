@@ -141,7 +141,8 @@ class TestApi(unittest.TestCase):
         ['buildingInstructions7', 'BUILDINGINSTRUCTION 8535', '5678.pdf', '1234-1_5678.pdf'],
         ['buildingInstructions8', 'BULDING INSTRUCTION, 8593', '5678.pdf', '1234-1_5678.pdf'],
         ['buildingInstructions9', 'BULDINGINSTRUCTION, 8596', '5678.pdf', '1234-1_5678.pdf'],
-        ['setNumber0', '60303_01_Build_Main', '60303_01_Build_Main.pdf', '1234-1_6030301.pdf']
+        ['setNumber0', '60303_01_Build_Main', '60303_01_Build_Main.pdf', '1234-1_6030301.pdf'],
+        ['setNUmber1', '51515_Tricky', '51515_Tricky.pdf', '51515-1_2bed0596.pdf']
     ])
     def test__constructInstructionFilename(self, name, instruction_description, cdn_filename, expected):
         self.assertEquals(api._construct_instruction_filename('1234-1', instruction_description, 'https://www.lego.com/cdn/' + cdn_filename), expected)
