@@ -94,10 +94,11 @@ def get_sets(
     if extended:
         params['extendedData'] = 1
 
-    # TODO: validate limit
     if count:
         params['pageSize'] = 0
     else:
+        if not _is_valid_limit(limit):
+            return
         params['pageSize'] = limit
 
     sets_json = api.execute_api_request('getSets', include_hash=True, params=params)
@@ -186,6 +187,15 @@ def get_years(theme):
         print('{}: {}'.format(year['year'], year['setCount']))
 
 
+def _is_valid_limit(limit):
+    try:
+        if not 1 <= int(limit) <= 500:
+            sys.exit('ERROR: limit must be between 1 and 500')
+    except (TypeError, ValueError):
+        sys.exit('ERROR: limit must be an integer')
+    return True
+
+
 def _is_iso8601_date(updated_since):
     if not re.compile('^\\d{4}-\\d{2}-\\d{2}$').match(updated_since):
         sys.exit('ERROR: updated_since must have format yyyy-MM-dd')
@@ -225,7 +235,7 @@ def _get_set_number(set_id):
     cache = config.get_cache()
     if set_id not in cache['sets']:
         sets_json = api.execute_api_request('getSets', include_hash=True, params={'setID': set_id})
-        config.update_cache(sets_json['sets'])
+        cache = config.update_cache(sets_json['sets'])
     return cache['sets'].get(set_id, None)
 
 
