@@ -226,7 +226,7 @@ class TestApi(unittest.TestCase):
         ['setNumber1', '51515_Tricky', '51515_Tricky.pdf', '1234-1_2bed0596.pdf']
     ])
     def test__constructInstructionFilename(self, name, instruction_description, cdn_filename, expected):
-        self.assertEquals(api._construct_instruction_filename('1234-1', instruction_description, 'https://www.lego.com/cdn/' + cdn_filename), expected)
+        self.assertEqual(api._construct_instruction_filename('1234-1', instruction_description, 'https://www.lego.com/cdn/' + cdn_filename), expected)
 
     @parameterized.expand([
         ['simple',          'V39',          'v39'],

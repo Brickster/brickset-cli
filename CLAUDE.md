@@ -14,13 +14,13 @@ pip install -r requirements-test.txt
 
 ```bash
 # Run all tests
-nosetests tests/
+pytest tests/
 
 # Run a single test file
-nosetests tests/test_api.py
+pytest tests/test_api.py
 
 # Run a single test
-nosetests tests/test_api.py:TestApi.test_executeApiRequest
+pytest tests/test_api.py::TestApi::test_executeApiRequest
 
 # Run the CLI
 python bin/brickset --help

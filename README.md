@@ -23,5 +23,5 @@ $ brickset login
 
 ```commandline
 $ pip install -r requirements-test.txt
-$ nosetests tests/
+$ pytest tests/
 ```
