@@ -1,6 +1,6 @@
 # brickset CLI
 
-A command line interface for [brickset](https://brickset.com)'s v3 API.
+A command line interface for [brickset](https://brickset.com)'s [v3 API](https://brickset.com/article/52664/api-version-3-documentation).
 
 ## Requirements
 - Python 2.7+
