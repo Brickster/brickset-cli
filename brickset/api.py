@@ -44,17 +44,17 @@ def download_instruction(directory, set_number, instruction):
 
 
 def _parse_pdf_number(instruction_url):
-    match = re.compile('^https://www\.lego\.com.*/(.*)\.pdf$').match(instruction_url)
+    match = re.compile(r'^https://www\.lego\.com.*/(.*)\.pdf$').match(instruction_url)
     if match:
         pdf_name = match.group(1).lower()
 
         # just a number
-        match = re.compile('^\d+$').match(pdf_name)
+        match = re.compile(r'^\d+$').match(pdf_name)
         if match:
             return pdf_name
 
         # main build
-        match = re.compile('^(\d+)_(\d+)_build_main$').match(pdf_name)
+        match = re.compile(r'^(\d+)_(\d+)_build_main$').match(pdf_name)
         if match:
             return match.group(1) + match.group(2)
     return None
@@ -69,7 +69,7 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
 
     # REGION BOOK/OF_BOOKS
     match = re.compile(
-        '^BI.*?(IN|NA|V[\.\s]*\d+(?:/\d+)?)\s+(?:BOOK\s*)?(\d+)(?:\s*/\s*\d+)?$', flags=re.IGNORECASE
+        r'^BI.*?(IN|NA|V[\.\s]*\d+(?:/\d+)?)\s+(?:BOOK\s*)?(\d+)(?:\s*/\s*\d+)?$', flags=re.IGNORECASE
     ).match(instruction_description)
     if match:
         region = _clean_region(match.group(1))
@@ -78,7 +78,7 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
 
     # BOOK/OF_BOOKS REGION
     match = re.compile(
-        '^BI.*?\s+(?:BOOK\s+)?(\d+)/\d+\s+(IN|NA|V[\.\s]*\d+(?:/V?\d+)?)$', flags=re.IGNORECASE
+        r'^BI.*?\s+(?:BOOK\s+)?(\d+)/\d+\s+(IN|NA|V[\.\s]*\d+(?:/V?\d+)?)$', flags=re.IGNORECASE
     ).match(instruction_description)
     if match:
         region = _clean_region(match.group(2))
@@ -86,12 +86,12 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
         return '{}_{}_b{}_{}.pdf'.format(set_number, region, book, pdf_number)
 
     # /BOOK
-    match = re.compile('^(?:BI|BUILDING INSTRUCTION)\s+\d+/(\d+)$').match(instruction_description)
+    match = re.compile(r'^(?:BI|BUILDING INSTRUCTION)\s+\d+/(\d+)$').match(instruction_description)
     if match:
         return '{}_b{}_{}.pdf'.format(set_number, match.group(1), pdf_number)
 
     # REGION
-    match = re.compile('^BI.*?\s+(IN|NA|V/?[\.\s]*\d+(?:((?:/|\s[+&]\s)V?\d+)+)?)$').match(instruction_description)
+    match = re.compile(r'^BI.*?\s+(IN|NA|V/?[\.\s]*\d+(?:((?:/|\s[+&]\s)V?\d+)+)?)$').match(instruction_description)
     if match:
         region = _clean_region(match.group(1))
         if 'comic book' in instruction_description.lower():
@@ -101,23 +101,23 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
         return filename
 
     # BOOK/OF_BOOKS
-    match = re.compile('^BI.*?\s+(?:BOOK\s+)?(\d+)/\d+$').match(instruction_description)
+    match = re.compile(r'^BI.*?\s+(?:BOOK\s+)?(\d+)/\d+$').match(instruction_description)
     if match:
         book = match.group(1)
         return '{}_b{}_{}.pdf'.format(set_number, book, pdf_number)
 
     # BUILD MAIN
-    match = re.compile('^\d+_\d+_build_main$', flags=re.IGNORECASE).match(instruction_description)
+    match = re.compile(r'^\d+_\d+_build_main$', flags=re.IGNORECASE).match(instruction_description)
     if match:
         return '{}_{}.pdf'.format(set_number, pdf_number)
 
     # Set number and short description
-    match = re.compile('\d+_[a-z]+', flags=re.IGNORECASE).match(instruction_description)
+    match = re.compile(r'\d+_[a-z]+', flags=re.IGNORECASE).match(instruction_description)
     if match:
         return '{}_{}.pdf'.format(set_number, hashlib.sha256(bytes(instruction_description.encode('utf-8'))).hexdigest()[0:8])
 
     # OTHER
-    match = re.compile('^(?:BI|BUI?LDING\s*INSTRUCTION).*?[\s-]+(\d+)$').match(instruction_description)
+    match = re.compile(r'^(?:BI|BUI?LDING\s*INSTRUCTION).*?[\s-]+(\d+)$').match(instruction_description)
     if match:
         return '{}_{}.pdf'.format(set_number, pdf_number)
 
@@ -125,7 +125,7 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
 
 
 def _clean_region(region_to_clean):
-    result = re.sub('[\s.]', '', region_to_clean)
+    result = re.sub(r'[\s.]', '', region_to_clean)
     result = result.replace('V/', 'V')
     result = result.replace('/V', '/')
     result = result.replace('/', '_V')
