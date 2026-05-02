@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = brickset
+omit = tests/*
+       **/__init__.py
+       .venv/*
+       **/conftest.py

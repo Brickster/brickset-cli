@@ -1,6 +1,6 @@
 # brickset CLI
 
-[![Python application](https://github.com/Brickster/brickset-cli/actions/workflows/python-app.yml/badge.svg?branch=main)](https://github.com/Brickster/brickset-cli/actions/workflows/python-app.yml)
+[![build](https://github.com/Brickster/brickset-cli/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/Brickster/brickset-cli/actions/workflows/build.yml) [![Maintainability](https://qlty.sh/gh/Brickster/projects/brickset-cli/maintainability.svg)](https://qlty.sh/gh/Brickster/projects/brickset-cli) [![Code Coverage](https://qlty.sh/gh/Brickster/projects/brickset-cli/coverage.svg)](https://qlty.sh/gh/Brickster/projects/brickset-cli)
 
 A command line interface for [brickset](https://brickset.com)'s [v3 API](https://brickset.com/article/52664/api-version-3-documentation).
 
