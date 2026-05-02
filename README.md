@@ -23,7 +23,9 @@ $ brickset login
 
 ## Running tests
 
-```commandline
-$ pip install -r requirements-test.txt
-$ pytest tests/
+```sh
+$ brew install pipx
+$ pipx ensurepath
+$ pipx install nox
+$ nox
 ```
