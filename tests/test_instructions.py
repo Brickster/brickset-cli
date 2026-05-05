@@ -40,6 +40,122 @@ class TestInstructions(unittest.TestCase):
             'WARN: Skipping unknown instruction URL format: https://www.lego.com/cdn/5678.pdf'
         )
 
+    @mock.patch('brickset.sets.config.update_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    @mock.patch('brickset.sets.config.get_cache', return_value={'sets': {}})
+    @mock.patch('builtins.print')
+    @mock.patch('brickset.api.execute_api_request')
+    def test_getInstructions(self, mock_api, mock_print, mock_get_cache, mock_update_cache):
+        get_sets_response = {'sets': [{'number': '456', 'numberVariant': 1, 'setID': '123'}]}
+        get_instructions_response = {
+            'status': 'success',
+            'matches': 2,
+            'instructions': [
+                {'URL': 'https://www.lego.com/biassets/bi/6307466.pdf', 'description': 'BI 2002/ 2 - 30453 V29'},
+                {'URL': 'https://www.lego.com/biassets/bi/6307469.pdf', 'description': 'BI 2002/ 2 - 30453 V39'}
+            ]
+        }
+        mock_api.side_effect = [get_sets_response, get_instructions_response]
+
+        instructions.get_instructions(['123'], None, None)
+
+        mock_api.assert_has_calls([
+            mock.call('getSets', include_hash=True, params={'setID': '123'}),
+            mock.call('getInstructions', setID='123')
+        ])
+        mock_print.assert_has_calls([
+            mock.call('456-1: "BI 2002/ 2 - 30453 V29" https://www.lego.com/biassets/bi/6307466.pdf'),
+            mock.call('456-1: "BI 2002/ 2 - 30453 V39" https://www.lego.com/biassets/bi/6307469.pdf'),
+        ])
+
+    @mock.patch('brickset.sets.config.update_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    @mock.patch('brickset.sets.config.get_cache', return_value={'sets': {}})
+    @mock.patch('builtins.print')
+    @mock.patch('brickset.api.execute_api_request')
+    def test_getInstructions_whenNoInstructionsExist(self, mock_api, mock_print, mock_get_cache, mock_update_cache):
+        get_sets_response = {'sets': [{'number': '456', 'numberVariant': 1, 'setID': '123'}]}
+        get_instructions_response = {'status': 'success', 'matches': 0, 'instructions': []}
+        mock_api.side_effect = [get_sets_response, get_instructions_response]
+
+        instructions.get_instructions(['123'], None, None)
+
+        mock_api.assert_has_calls([
+            mock.call('getSets', include_hash=True, params={'setID': '123'}),
+            mock.call('getInstructions', setID='123')
+        ])
+        mock_print.assert_called_once_with('No instructions found for 456-1 (123)')
+
+    @mock.patch('brickset.sets.config.update_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    @mock.patch('brickset.sets.config.get_cache', return_value={'sets': {}})
+    @mock.patch('brickset.instructions.download_instruction')
+    @mock.patch('brickset.api.execute_api_request')
+    def test_getInstructions_whenDownloading(self, mock_api, mock_download, mock_get_cache, mock_update_cache):
+        get_sets_response = {'sets': [{'number': '456', 'numberVariant': 1, 'setID': '123'}]}
+        get_instructions_response = {
+            'status': 'success',
+            'matches': 2,
+            'instructions': [
+                {'URL': 'https://www.lego.com/biassets/bi/6307466.pdf', 'description': 'BI 2002/ 2 - 30453 V29'},
+                {'URL': 'https://www.lego.com/biassets/bi/6307469.pdf', 'description': 'BI 2002/ 2 - 30453 V39'}
+            ]
+        }
+        mock_api.side_effect = [get_sets_response, get_instructions_response]
+
+        instructions.get_instructions(['123'], '/tmp', None)
+
+        mock_api.assert_has_calls([
+            mock.call('getSets', include_hash=True, params={'setID': '123'}),
+            mock.call('getInstructions', setID='123')
+        ])
+        mock_download.assert_has_calls([
+            mock.call('/tmp', '456-1', get_instructions_response['instructions'][0]),
+            mock.call('/tmp', '456-1', get_instructions_response['instructions'][1])
+        ])
+
+    @mock.patch('brickset.instructions.download_instruction')
+    @mock.patch('brickset.api.execute_api_request')
+    def test_getInstructions_whenDownloadingAndSetNumberSupplied(self, mock_api, mock_download):
+        get_instructions_response = {
+            'status': 'success',
+            'matches': 2,
+            'instructions': [
+                {'URL': 'https://www.lego.com/biassets/bi/6307466.pdf', 'description': 'BI 2002/ 2 - 30453 V29'},
+                {'URL': 'https://www.lego.com/biassets/bi/6307469.pdf', 'description': 'BI 2002/ 2 - 30453 V39'}
+            ]
+        }
+        mock_api.return_value = get_instructions_response
+
+        instructions.get_instructions(['123'], '/tmp', ['SET_NUM'])
+
+        mock_api.assert_called_once_with('getInstructions', setID='123')
+        mock_download.assert_has_calls([
+            mock.call('/tmp', 'SET_NUM', get_instructions_response['instructions'][0]),
+            mock.call('/tmp', 'SET_NUM', get_instructions_response['instructions'][1])
+        ])
+
+    @mock.patch('brickset.sets.config.update_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    @mock.patch('brickset.sets.config.get_cache', return_value={'sets': {}})
+    @mock.patch('builtins.print')
+    @mock.patch('brickset.api.execute_api_request')
+    def test_getInstructions_whenDownloadingAndNoInstructionsExist(self, mock_api, mock_print, mock_get_cache, mock_update_cache):
+        get_sets_response = {'sets': [{'number': '456', 'numberVariant': 1, 'setID': '123'}]}
+        get_instructions_response = {'status': 'success', 'matches': 0, 'instructions': []}
+        mock_api.side_effect = [get_sets_response, get_instructions_response]
+
+        with mock.patch('builtins.open', mock.mock_open()) as mock_open:
+            instructions.get_instructions(['123'], '/tmp', None)
+
+        mock_api.assert_has_calls([
+            mock.call('getSets', include_hash=True, params={'setID': '123'}),
+            mock.call('getInstructions', setID='123')
+        ])
+        mock_print.assert_called_once_with('No instructions found for 456-1 (123)')
+        mock_open.assert_called_once_with('/tmp/456-1_noinstructions.txt', 'wb')
+
+    @mock.patch('builtins.print')
+    def test__printInstruction(self, mock_print):
+        instructions._print_instruction('123-4', {'URL': 'lego.com/123-4.pdf', 'description': '123-4 instructions'})
+        mock_print.assert_called_once_with('123-4: "123-4 instructions" lego.com/123-4.pdf')
+
     @parameterized.expand([
         ['noDescription0', '{No longer listed at LEGO.com}', '1234-1', '5678.pdf', '1234-1_5678.pdf'],
         ['regionBookOfBooks0', 'BI 3017 / 32 - 70704 V39 2/2', '1234-1', '5678.pdf', '1234-1_v39_b2_5678.pdf'],

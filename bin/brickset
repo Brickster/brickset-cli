@@ -7,6 +7,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from brickset import config
+from brickset import instructions
 from brickset import minifigs
 from brickset import sets
 
@@ -101,7 +102,7 @@ if __name__ == '__main__':
     identifier_group.add_argument('--id', nargs='+', help='Brickset ID')
     identifier_group.add_argument('--set-number', '--number', nargs='+', help='Set number')
     # instructions_parser.add_argument('id', nargs='+', help='Brickset ID')
-    instructions_parser.set_defaults(func=sets.get_instructions)
+    instructions_parser.set_defaults(func=instructions.get_instructions)
     instructions_parser.add_argument(
         '--download',
         '-d',

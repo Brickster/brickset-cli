@@ -2,6 +2,9 @@ import hashlib
 import re
 import requests
 
+from . import api
+from .sets import _id_to_set_number_generator, _set_number_to_id_generator
+
 
 def _parse_pdf_number(instruction_url):
     match = re.compile(r'^https://www\.lego\.com.*/(.*)\.pdf$').match(instruction_url)
@@ -97,6 +100,35 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
             return handler(set_number, pdf_number, m, instruction_description)
 
     return None
+
+
+def get_instructions(id, directory, set_number=None):
+    ids = id if id is not None else _set_number_to_id_generator(set_number)
+    set_numbers = set_number if set_number is not None else _id_to_set_number_generator(id)
+    for set_id, cur_set_number in zip(ids, set_numbers):
+        if not set_id:
+            print('No instructions found for set number {}'.format(cur_set_number))
+            continue
+        if not cur_set_number:
+            print('No instructions found for set ID {}'.format(set_id))
+            continue
+        instructions_json = api.execute_api_request('getInstructions', setID=set_id)
+        if not instructions_json['instructions']:
+            print('No instructions found for {} ({})'.format(cur_set_number, set_id))
+            if directory:
+                with open('{}/{}_noinstructions.txt'.format(directory, cur_set_number), 'wb'):
+                    pass
+            continue
+
+        fetched = instructions_json['instructions']
+        if directory:
+            [download_instruction(directory, cur_set_number, i) for i in fetched]
+        else:
+            [_print_instruction(cur_set_number, i) for i in fetched]
+
+
+def _print_instruction(set_number, instruction):
+    print('{}: "{}" {}'.format(set_number, instruction['description'], instruction['URL']))
 
 
 def download_instruction(directory, set_number, instruction):
