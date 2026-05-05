@@ -24,5 +24,3 @@ def configure(api_key):
         os.mkdir(config_dir)
     with open(config_dir + _CONFIG_FILENAME, 'w') as config_file:
         json.dump({'api_key': api_key}, config_file)
-
-

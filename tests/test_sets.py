@@ -71,7 +71,6 @@ class TestSets(unittest.TestCase):
         )
         mock_print.assert_called_once_with('789')
 
-
     @mock.patch('brickset.cache.update_cache', return_value={'sets': {'1394': '3219-1', '3219-1': '1394'}})
     @mock.patch('brickset.cache.get_cache', return_value={'sets': {}})
     @mock.patch('brickset.api.execute_api_request')
@@ -219,4 +218,3 @@ class TestSets(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             sets._is_valid_order_by('ThemeDESC')
         self.assertEqual('ERROR: invalid sort option', cm.exception.code)
-

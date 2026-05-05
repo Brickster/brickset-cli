@@ -59,4 +59,3 @@ class TestApi(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             api.execute_api_request('getSets')
         self.assertEqual('ERROR: getSets API returned an unexpected error', cm.exception.code)
-

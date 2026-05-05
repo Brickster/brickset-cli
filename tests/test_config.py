@@ -36,4 +36,3 @@ class TestConfig(unittest.TestCase):
         with mock.patch('builtins.open', mock.mock_open()):
             config.configure('abc123')
         mock_mkdir.assert_called_once()
-

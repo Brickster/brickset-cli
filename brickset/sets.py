@@ -5,7 +5,6 @@ import sys
 
 from . import api
 from . import cache
-from . import config
 
 _VALID_SORTS = [
     'Number',
@@ -46,7 +45,7 @@ _VALID_SORTS = [
     'OwnCountDESC',
     'WantCount',
     'WantCountDESC',
-    'UserRating'
+    'UserRating',
     'CollectionID'
 ]
 
@@ -192,6 +191,3 @@ def _is_valid_order_by(order_by):
         if re.compile('^{}$'.format(valid_sort), flags=re.IGNORECASE).match(order_by):
             return True
     sys.exit('ERROR: invalid sort option')
-
-
-
