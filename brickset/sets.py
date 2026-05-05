@@ -5,6 +5,7 @@ import sys
 
 from . import api
 from . import config
+from .instructions import download_instruction
 
 _VALID_SORTS = [
     'Number',
@@ -158,7 +159,7 @@ def get_instructions(id, directory, set_number=None):
 
         instructions = instructions_json['instructions']
         if directory:
-            [api.download_instruction(directory, cur_set_number, i) for i in instructions]
+            [download_instruction(directory, cur_set_number, i) for i in instructions]
         else:
             [_print_instruction(cur_set_number, i) for i in instructions]
 

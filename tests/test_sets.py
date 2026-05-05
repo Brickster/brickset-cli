@@ -116,7 +116,7 @@ class TestSets(unittest.TestCase):
 
     @mock.patch('brickset.sets.config.update_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
     @mock.patch('brickset.sets.config.get_cache', return_value={'sets': {}})
-    @mock.patch('brickset.api.download_instruction')
+    @mock.patch('brickset.sets.download_instruction')
     @mock.patch('brickset.api.execute_api_request')
     def test_getInstructions_whenDownloading(self, mock_api, mock_download, mock_get_cache, mock_update_cache):
         get_sets_response = {'sets': [{'number': '456', 'numberVariant': 1, 'setID': '123'}]}
@@ -141,7 +141,7 @@ class TestSets(unittest.TestCase):
             mock.call('/tmp', '456-1', get_instructions_response['instructions'][1])
         ])
 
-    @mock.patch('brickset.api.download_instruction')
+    @mock.patch('brickset.sets.download_instruction')
     @mock.patch('brickset.api.execute_api_request')
     def test_getInstructions_whenDownloadingAndSetNumberSupplied(self, mock_api, mock_download):
         get_instructions_response = {
