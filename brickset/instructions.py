@@ -3,7 +3,7 @@ import re
 import requests
 
 from . import api
-from .sets import _id_to_set_number_generator, _set_number_to_id_generator
+from .cache import id_to_set_number_generator, set_number_to_id_generator
 
 
 def _parse_pdf_number(instruction_url):
@@ -103,8 +103,8 @@ def _construct_instruction_filename(set_number, instruction_description, instruc
 
 
 def get_instructions(id, directory, set_number=None):
-    ids = id if id is not None else _set_number_to_id_generator(set_number)
-    set_numbers = set_number if set_number is not None else _id_to_set_number_generator(id)
+    ids = id if id is not None else set_number_to_id_generator(set_number)
+    set_numbers = set_number if set_number is not None else id_to_set_number_generator(id)
     for set_id, cur_set_number in zip(ids, set_numbers):
         if not set_id:
             print('No instructions found for set number {}'.format(cur_set_number))

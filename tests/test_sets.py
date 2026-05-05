@@ -1,12 +1,13 @@
 import unittest
 from unittest import mock
 
+from brickset import cache
 from brickset import sets
 
 
 class TestSets(unittest.TestCase):
 
-    @mock.patch('brickset.sets.config.update_cache')
+    @mock.patch('brickset.cache.update_cache')
     @mock.patch('builtins.print')
     @mock.patch('brickset.api.execute_api_request')
     def test_getSets(self, mock_api, mock_print, mock_update_cache):
@@ -45,7 +46,7 @@ class TestSets(unittest.TestCase):
             )
         self.assertEqual('ERROR: limit must be between 1 and 500', cm.exception.code)
 
-    @mock.patch('brickset.sets.config.update_cache')
+    @mock.patch('brickset.cache.update_cache')
     @mock.patch('builtins.print')
     @mock.patch('brickset.api.execute_api_request')
     def test_getSets_whenCountOnly(self, mock_api, mock_print, mock_update_cache):
@@ -58,7 +59,7 @@ class TestSets(unittest.TestCase):
         mock_api.assert_called_once_with('getSets', include_hash=True, params={'query': 'star wars', 'pageSize': 0})
         mock_print.assert_called_once_with(42)
 
-    @mock.patch('brickset.sets.config.update_cache')
+    @mock.patch('brickset.cache.update_cache')
     @mock.patch('builtins.print')
     @mock.patch('brickset.api.execute_api_request')
     def test_getSets_whenIdOnly(self, mock_api, mock_print, mock_update_cache):
@@ -71,8 +72,8 @@ class TestSets(unittest.TestCase):
         mock_print.assert_called_once_with('789')
 
 
-    @mock.patch('brickset.sets.config.update_cache', return_value={'sets': {'1394': '3219-1', '3219-1': '1394'}})
-    @mock.patch('brickset.sets.config.get_cache', return_value={'sets': {}})
+    @mock.patch('brickset.cache.update_cache', return_value={'sets': {'1394': '3219-1', '3219-1': '1394'}})
+    @mock.patch('brickset.cache.get_cache', return_value={'sets': {}})
     @mock.patch('brickset.api.execute_api_request')
     def test__getSetNumber(self, mock_api, mock_get_cache, mock_update_cache):
         mock_api.return_value = {
@@ -81,7 +82,7 @@ class TestSets(unittest.TestCase):
             'sets': [{'setID': 1394, 'number': '3219', 'numberVariant': 1}]
         }
 
-        set_number = sets._get_set_number('1394')
+        set_number = cache._get_set_number('1394')
 
         mock_api.assert_called_once_with('getSets', include_hash=True, params={'setID': '1394'})
         self.assertEqual('3219-1', set_number)

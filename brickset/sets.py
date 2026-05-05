@@ -4,6 +4,7 @@ import re
 import sys
 
 from . import api
+from . import cache
 from . import config
 
 _VALID_SORTS = [
@@ -102,7 +103,7 @@ def get_sets(
         params['pageSize'] = limit
 
     sets_json = api.execute_api_request('getSets', include_hash=True, params=params)
-    config.update_cache(sets_json['sets'])
+    cache.update_cache(sets_json['sets'])
     if count:
         print(sets_json['matches'])
     else:
@@ -123,17 +124,6 @@ def update_set(id, owned, wanted, notes, rating):
     if rating is not None:
         params['rating'] = rating
     api.execute_api_request('setCollection', include_hash=True, setID=id, params=params)
-
-
-def _id_to_set_number_generator(ids):
-    for i in ids:
-        yield _get_set_number(i)
-
-
-def _set_number_to_id_generator(set_numbers):
-    for n in set_numbers:
-        yield _get_id(n)
-
 
 
 def get_themes(theme):
@@ -203,20 +193,5 @@ def _is_valid_order_by(order_by):
             return True
     sys.exit('ERROR: invalid sort option')
 
-
-def _get_set_number(set_id):
-    cache = config.get_cache()
-    if set_id not in cache['sets']:
-        sets_json = api.execute_api_request('getSets', include_hash=True, params={'setID': set_id})
-        cache = config.update_cache(sets_json['sets'])
-    return cache['sets'].get(set_id, None)
-
-
-def _get_id(set_number):
-    cache = config.get_cache()
-    if set_number not in cache['sets']:
-        sets_json = api.execute_api_request('getSets', include_hash=True, params={'setNumber': set_number})
-        cache = config.update_cache(sets_json['sets'], cache)
-    return cache['sets'].get(set_number, None)
 
 
