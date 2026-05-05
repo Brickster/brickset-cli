@@ -10,6 +10,7 @@ from brickset import config
 from brickset import instructions
 from brickset import minifigs
 from brickset import sets
+from brickset import user
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='brickset', epilog='for more detail, use: man brickset')
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     login_parser = subparsers.add_parser(
         'login', help='log in and retrieve user hash', description='log in and retrieve user hash'
     )
-    login_parser.set_defaults(func=config.log_in)
+    login_parser.set_defaults(func=user.log_in)
 
     # ------------------------------------------
     # USAGE
@@ -51,7 +52,7 @@ if __name__ == '__main__':
         dest='mode',
         help='always show the most recent day even if not today'
     )
-    usage_parser.set_defaults(func=config.show_usage)
+    usage_parser.set_defaults(func=user.show_usage)
 
     # ------------------------------------------
     # SETS
