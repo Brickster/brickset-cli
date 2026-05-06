@@ -212,3 +212,115 @@ class TestSets(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             sets._is_valid_order_by('ThemeDESC')
         self.assertEqual('ERROR: invalid sort option', cm.exception.code)
+
+    def test_buildFilterParams_allFields(self):
+        filters = sets.SetFilters(
+            id='123',
+            set_number=['456-1', '789-1'],
+            theme=['Star Wars', 'City'],
+            subtheme=['Clone Wars'],
+            year=['2020', '2021'],
+            tag='exclusive',
+            owned=True,
+            wanted=True,
+        )
+        self.assertEqual({
+            'setID': '123',
+            'setNumber': '456-1,789-1',
+            'theme': 'Star Wars,City',
+            'subtheme': 'Clone Wars',
+            'year': '2020,2021',
+            'tag': 'exclusive',
+            'owned': 1,
+            'wanted': 1,
+        }, sets._build_filter_params(filters))
+
+    @mock.patch('brickset.cache.update_cache')
+    @mock.patch('builtins.print')
+    @mock.patch('brickset.api.execute_api_request')
+    def test_getSets_withUpdatedSince(self, mock_api, mock_print, mock_update_cache):
+        mock_api.return_value = {'sets': [], 'matches': 0}
+        sets.get_sets(
+            sets.SetFilters(updated_since='2024-01-01'),
+            limit=20, order_by=None, extended=False, id_only=False, count=False
+        )
+        mock_api.assert_called_once_with('getSets', include_hash=True, params={
+            'updatedSince': '2024-01-01', 'pageSize': 20
+        })
+
+    @mock.patch('brickset.cache.update_cache')
+    @mock.patch('builtins.print')
+    @mock.patch('brickset.api.execute_api_request')
+    def test_getSets_withOrderBy(self, mock_api, mock_print, mock_update_cache):
+        mock_api.return_value = {'sets': [], 'matches': 0}
+        sets.get_sets(
+            sets.SetFilters(),
+            limit=20, order_by='YearFrom', extended=False, id_only=False, count=False
+        )
+        mock_api.assert_called_once_with('getSets', include_hash=True, params={
+            'orderBy': 'YearFrom', 'pageSize': 20
+        })
+
+    @mock.patch('brickset.cache.update_cache')
+    @mock.patch('builtins.print')
+    @mock.patch('brickset.api.execute_api_request')
+    def test_getSets_whenExtended(self, mock_api, mock_print, mock_update_cache):
+        mock_api.return_value = {'sets': [], 'matches': 0}
+        sets.get_sets(
+            sets.SetFilters(),
+            limit=20, order_by=None, extended=True, id_only=False, count=False
+        )
+        mock_api.assert_called_once_with('getSets', include_hash=True, params={
+            'extendedData': 1, 'pageSize': 20
+        })
+
+    @mock.patch('brickset.sets._is_valid_limit', return_value=False)
+    def test_getSets_whenLimitValidationReturnsFalse(self, _mock):
+        self.assertIsNone(sets.get_sets(
+            sets.SetFilters(), limit=20, order_by=None, extended=False, id_only=False, count=False
+        ))
+
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateSet_whenOwned1(self, mock_api):
+        sets.update_set('123', owned=1, wanted=None, notes=None, rating=None)
+        mock_api.assert_called_once_with('setCollection', include_hash=True, setID='123', params={'own': 1})
+
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateSet_whenQtyOwned(self, mock_api):
+        sets.update_set('123', owned=5, wanted=None, notes=None, rating=None)
+        mock_api.assert_called_once_with('setCollection', include_hash=True, setID='123', params={'qtyOwned': 5})
+
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateSet_whenWanted(self, mock_api):
+        sets.update_set('123', owned=None, wanted=True, notes=None, rating=None)
+        mock_api.assert_called_once_with('setCollection', include_hash=True, setID='123', params={'want': 1})
+
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateSet_whenNotWanted(self, mock_api):
+        sets.update_set('123', owned=None, wanted=False, notes=None, rating=None)
+        mock_api.assert_called_once_with('setCollection', include_hash=True, setID='123', params={'want': 0})
+
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateSet_withNotesAndRating(self, mock_api):
+        sets.update_set('123', owned=None, wanted=None, notes='Great set', rating=5)
+        mock_api.assert_called_once_with('setCollection', include_hash=True, setID='123', params={
+            'notes': 'Great set', 'rating': 5
+        })
+
+    @mock.patch('builtins.print')
+    def test__printSet_whenOwned(self, mock_print):
+        lego_set = {
+            'number': '123', 'numberVariant': '4', 'setID': '789', 'name': 'Set A',
+            'collection': {'owned': True, 'qtyOwned': 2, 'wanted': False}
+        }
+        sets._print_set(lego_set, False)
+        mock_print.assert_called_once_with('123-4 789 Set A (2 owned)')
+
+    @mock.patch('builtins.print')
+    def test__printSet_whenWanted(self, mock_print):
+        lego_set = {
+            'number': '123', 'numberVariant': '4', 'setID': '789', 'name': 'Set A',
+            'collection': {'owned': False, 'wanted': True}
+        }
+        sets._print_set(lego_set, False)
+        mock_print.assert_called_once_with('123-4 789 Set A (wanted)')
