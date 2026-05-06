@@ -31,18 +31,21 @@ python bin/brickset --help
 The project is a CLI wrapper around the [Brickset v3 API](https://brickset.com/article/52664/api-version-3-documentation).
 
 - `brickset/` — main package
-  - `api.py` — HTTP layer: `execute_api_request` (all API calls), `download_instruction` (PDF download), and filename construction logic for instruction PDFs
-  - `config.py` — manages `~/.brickset/config` (API key + user hash) and `~/.brickset/cache` (setID ↔ set number mapping). Also contains `show_usage` and `log_in` which use the API.
-  - `sets.py` — set/instruction/theme/subtheme/year query logic
+  - `api.py` — HTTP layer: `execute_api_request` (all API calls)
+  - `cache.py` — manages `~/.brickset/cache` (setID ↔ set number mapping); `get_cache`, `update_cache`, `id_to_set_number_generator`, `set_number_to_id_generator`
+  - `config.py` — manages `~/.brickset/config` (API key + user hash); `get_config`, `configure`
+  - `instructions.py` — instruction PDF download logic: `get_instructions`, `download_instruction`, `_construct_instruction_filename` (regex-based filename builder)
+  - `sets.py` — set query logic: `get_sets` (takes a `SetFilters` dataclass), `update_set`, `get_themes`, `get_subthemes`, `get_years`
   - `minifigs.py` — minifig query logic
+  - `user.py` — `show_usage`, `log_in`
 - `bin/brickset` — CLI entry point (argparse); adds the project root to `sys.path` so `brickset` is importable as a package, then delegates everything to `brickset/`
 
 ## Key details
 
-**Instruction filename construction** (`api._construct_instruction_filename`) is complex — it parses LEGO's free-text instruction descriptions using a series of regex patterns to extract region codes (e.g. `V39`) and book numbers. There are 130+ parameterized test cases covering this. Do not simplify the regexes without running the full test suite.
+**Instruction filename construction** (`instructions._construct_instruction_filename`) is complex — it parses LEGO's free-text instruction descriptions using a series of `@_rule`-decorated handlers to extract region codes (e.g. `V39`) and book numbers. There are 130+ parameterized test cases covering this. Do not simplify the regexes without running the full test suite.
 
 **`sys.exit` pattern** — validation functions (`_is_iso8601_date`, `_is_valid_order_by`, `_is_valid_limit`) call `sys.exit` on invalid input. Tests assert on this by catching `SystemExit` with `assertRaises` — do not mock `sys.exit`.
 
-**Cache** — `config.update_cache` returns the updated cache dict; callers must use the return value. `config.get_cache` returns `{'sets': {}}` when no cache file exists.
+**Cache** — `cache.update_cache` returns the updated cache dict; callers must use the return value. `cache.get_cache` returns `{'sets': {}}` when no cache file exists.
 
-**Circular import** — `config.py` imports `api` (for `show_usage`/`log_in`). This is a known smell; avoid adding more cross-imports between these modules.
+**`SetFilters`** — `get_sets` takes a `SetFilters` dataclass (defined in `sets.py`) rather than 10 flat filter parameters. The CLI adapter in `bin/brickset` constructs it from the flat argparse dict.
