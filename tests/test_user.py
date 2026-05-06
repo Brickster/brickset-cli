@@ -47,6 +47,24 @@ class TestUser(unittest.TestCase):
         user.show_usage('LAST')
         mock_print.assert_called_once_with('2024-01-01T00:00:00Z: 5')
 
-    @unittest.skip('log_in requires interactive input (input + getpass) and writes to disk — needs refactor to be testable')
-    def test_logIn(self):
-        pass
+    @mock.patch('builtins.print')
+    @mock.patch('brickset.user.api.execute_api_request')
+    def test_showUsage_today_whenEmptyUsage(self, mock_api, mock_print):
+        mock_api.return_value = {'apiKeyUsage': []}
+        user.show_usage('TODAY')
+        mock_print.assert_not_called()
+
+    @mock.patch('brickset.user._config_directory', return_value='/tmp/')
+    @mock.patch('brickset.user.get_config', return_value={'api_key': 'test-key'})
+    @mock.patch('brickset.user.api.execute_api_request', return_value={'hash': 'user-hash-123'})
+    @mock.patch('getpass.getpass', return_value='testpass')
+    @mock.patch('builtins.input', return_value='testuser')
+    def test_logIn(self, mock_input, mock_getpass, mock_api, mock_get_config, mock_config_dir):
+        with mock.patch('builtins.open', mock.mock_open()) as mock_open:
+            user.log_in()
+
+        mock_api.assert_called_once_with('login', username='testuser', password='testpass')
+        mock_open.assert_called_once_with('/tmp/config', 'w')
+        handle = mock_open()
+        written = ''.join(call.args[0] for call in handle.write.call_args_list)
+        self.assertIn('user-hash-123', written)

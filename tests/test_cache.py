@@ -43,3 +43,33 @@ class TestCache(unittest.TestCase):
         self.assertEqual({
             'sets': {'999': '888-1', '888-1': '999', '123': '456-1', '456-1': '123'}
         }, result)
+
+    @mock.patch('brickset.cache.update_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    @mock.patch('brickset.cache.api.execute_api_request', return_value={'sets': []})
+    @mock.patch('brickset.cache.get_cache', return_value={'sets': {}})
+    def test_getSetNumber_whenCacheMiss(self, mock_get_cache, mock_api, mock_update_cache):
+        cache._get_set_number('123')
+        mock_api.assert_called_once_with('getSets', include_hash=True, params={'setID': '123'})
+
+    @mock.patch('brickset.cache.get_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    def test_getSetNumber_whenCacheHit(self, mock_get_cache):
+        self.assertEqual('456-1', cache._get_set_number('123'))
+
+    @mock.patch('brickset.cache.update_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    @mock.patch('brickset.cache.api.execute_api_request', return_value={'sets': []})
+    @mock.patch('brickset.cache.get_cache', return_value={'sets': {}})
+    def test_getId_whenCacheMiss(self, mock_get_cache, mock_api, mock_update_cache):
+        cache._get_id('456-1')
+        mock_api.assert_called_once_with('getSets', include_hash=True, params={'setNumber': '456-1'})
+
+    @mock.patch('brickset.cache.get_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    def test_getId_whenCacheHit(self, mock_get_cache):
+        self.assertEqual('123', cache._get_id('456-1'))
+
+    @mock.patch('brickset.cache.get_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    def test_idToSetNumberGenerator(self, mock_get_cache):
+        self.assertEqual(['456-1', '456-1'], list(cache.id_to_set_number_generator(['123', '123'])))
+
+    @mock.patch('brickset.cache.get_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})
+    def test_setNumberToIdGenerator(self, mock_get_cache):
+        self.assertEqual(['123', '123'], list(cache.set_number_to_id_generator(['456-1', '456-1'])))

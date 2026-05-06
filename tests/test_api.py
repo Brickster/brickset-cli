@@ -21,6 +21,19 @@ class TestApi(unittest.TestCase):
         self.assertEqual({'status': 'success', 'sets': []}, result)
 
     @mock.patch('brickset.api.requests.get')
+    @mock.patch('brickset.api.config.get_config', return_value={'api_key': 'test-key'})
+    def test_executeApiRequest_withKwargs(self, mock_config, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {'status': 'success', 'sets': []}
+
+        api.execute_api_request('getSets', setID='123')
+
+        mock_get.assert_called_once_with(
+            'https://brickset.com/api/v3.asmx/getSets',
+            params={'apiKey': 'test-key', 'setID': '123'}
+        )
+
+    @mock.patch('brickset.api.requests.get')
     @mock.patch('brickset.api.config.get_config', return_value={'api_key': 'test-key', 'hash': 'user-hash'})
     def test_executeApiRequest_withHash(self, mock_config, mock_get):
         mock_get.return_value.status_code = 200

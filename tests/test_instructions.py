@@ -152,9 +152,31 @@ class TestInstructions(unittest.TestCase):
         mock_open.assert_called_once_with('/tmp/456-1_noinstructions.txt', 'wb')
 
     @mock.patch('builtins.print')
+    def test_getInstructions_whenSetIdMissing(self, mock_print):
+        instructions.get_instructions([''], None, ['456-1'])
+        mock_print.assert_called_once_with('No instructions found for set number 456-1')
+
+    @mock.patch('builtins.print')
+    def test_getInstructions_whenSetNumberMissing(self, mock_print):
+        instructions.get_instructions(['123'], None, [''])
+        mock_print.assert_called_once_with('No instructions found for set ID 123')
+
+    @mock.patch('builtins.print')
     def test__printInstruction(self, mock_print):
         instructions._print_instruction('123-4', {'URL': 'lego.com/123-4.pdf', 'description': '123-4 instructions'})
         mock_print.assert_called_once_with('123-4: "123-4 instructions" lego.com/123-4.pdf')
+
+
+class TestParsePdfNumber(unittest.TestCase):
+
+    def test_plainNumber(self):
+        self.assertEqual('6307466', instructions._parse_pdf_number('https://www.lego.com/biassets/bi/6307466.pdf'))
+
+    def test_buildMain(self):
+        self.assertEqual('6030301', instructions._parse_pdf_number('https://www.lego.com/cdn/60303_01_Build_Main.pdf'))
+
+    def test_nonLegoUrl(self):
+        self.assertIsNone(instructions._parse_pdf_number('https://example.com/5678.pdf'))
 
 
 class TestConstructInstructionFilename(unittest.TestCase):
