@@ -2,9 +2,49 @@ from __future__ import print_function
 
 import re
 import sys
+from dataclasses import dataclass
+from typing import List, Optional
 
 from . import api
 from . import cache
+
+
+@dataclass
+class SetFilters:
+    query: Optional[str] = None
+    id: Optional[str] = None
+    set_number: Optional[List[str]] = None
+    theme: Optional[List[str]] = None
+    subtheme: Optional[List[str]] = None
+    year: Optional[List[str]] = None
+    tag: Optional[str] = None
+    owned: bool = False
+    wanted: bool = False
+    updated_since: Optional[str] = None
+
+
+def _build_filter_params(filters: SetFilters) -> dict:
+    params = {}
+    if filters.query:
+        params['query'] = filters.query
+    if filters.id:
+        params['setID'] = filters.id
+    if filters.set_number:
+        params['setNumber'] = ','.join(filters.set_number)
+    if filters.theme:
+        params['theme'] = ','.join(filters.theme)
+    if filters.subtheme:
+        params['subtheme'] = ','.join(filters.subtheme)
+    if filters.year:
+        params['year'] = ','.join(filters.year)
+    if filters.tag:
+        params['tag'] = filters.tag
+    if filters.owned:
+        params['owned'] = 1
+    if filters.wanted:
+        params['wanted'] = 1
+    return params
+
 
 _VALID_SORTS = [
     'Number',
@@ -50,57 +90,21 @@ _VALID_SORTS = [
 ]
 
 
-def get_sets(
-        query,
-        id,
-        set_number,
-        theme,
-        subtheme,
-        year,
-        tag,
-        owned,
-        wanted,
-        updated_since,
-        limit,
-        order_by,
-        extended,
-        id_only,
-        count
-):
+def get_sets(filters: SetFilters, limit, order_by, extended, id_only, count):
     # NOTE: userHash is always required despite documentation saying it is optional unless using collection filters
-    params = {}
-    if query:
-        params['query'] = query
-    if id:
-        params['setID'] = id
-    if set_number:
-        params['setNumber'] = ','.join(set_number)
-    if theme:
-        params['theme'] = ','.join(theme)
-    if subtheme:
-        params['subtheme'] = ','.join(subtheme)
-    if year:
-        params['year'] = ','.join(year)
-    if tag:
-        params['tag'] = tag
-    if owned:
-        params['owned'] = 1
-    if wanted:
-        params['wanted'] = 1
-    if updated_since and _is_iso8601_date(updated_since):
-        params['updatedSince'] = updated_since
+    params = _build_filter_params(filters)
+    if filters.updated_since and _is_iso8601_date(filters.updated_since):
+        params['updatedSince'] = filters.updated_since
     if order_by and _is_valid_order_by(order_by):
         params['orderBy'] = order_by
     if extended:
         params['extendedData'] = 1
-
     if count:
         params['pageSize'] = 0
     else:
         if not _is_valid_limit(limit):
             return
         params['pageSize'] = limit
-
     sets_json = api.execute_api_request('getSets', include_hash=True, params=params)
     cache.update_cache(sets_json['sets'])
     if count:

@@ -83,7 +83,12 @@ if __name__ == '__main__':
         '--count', '-c', action='store_true', help='Only return the total number of matching sets'
     )
 
-    sets_parser.set_defaults(func=sets.get_sets)
+    def _dispatch_get_sets(**kwargs):
+        filter_fields = sets.SetFilters.__dataclass_fields__
+        filters = sets.SetFilters(**{k: kwargs.pop(k) for k in list(filter_fields) if k in kwargs})
+        sets.get_sets(filters, **kwargs)
+
+    sets_parser.set_defaults(func=_dispatch_get_sets)
 
     # ------------------------------------------
     # MINIFIGS

@@ -13,8 +13,7 @@ class TestSets(unittest.TestCase):
     def test_getSets(self, mock_api, mock_print, mock_update_cache):
         mock_api.return_value = {'sets': [], 'matches': 0}
         sets.get_sets(
-            query='star wars', id=None, set_number=None, theme=None, subtheme=None,
-            year=None, tag=None, owned=False, wanted=False, updated_since=None,
+            sets.SetFilters(query='star wars'),
             limit=20, order_by=None, extended=False, id_only=False, count=False
         )
         mock_api.assert_called_once_with('getSets', include_hash=True, params={'query': 'star wars', 'pageSize': 20})
@@ -22,8 +21,7 @@ class TestSets(unittest.TestCase):
     def test_getSets_whenUpdatedSinceIsInvalid(self):
         with self.assertRaises(SystemExit) as cm:
             sets.get_sets(
-                query=None, id=None, set_number=None, theme=None, subtheme=None,
-                year=None, tag=None, owned=False, wanted=False, updated_since='not-a-date',
+                sets.SetFilters(updated_since='not-a-date'),
                 limit=20, order_by=None, extended=False, id_only=False, count=False
             )
         self.assertEqual('ERROR: updated_since must have format yyyy-MM-dd', cm.exception.code)
@@ -31,8 +29,7 @@ class TestSets(unittest.TestCase):
     def test_getSets_whenOrderByIsInvalid(self):
         with self.assertRaises(SystemExit) as cm:
             sets.get_sets(
-                query=None, id=None, set_number=None, theme=None, subtheme=None,
-                year=None, tag=None, owned=False, wanted=False, updated_since=None,
+                sets.SetFilters(),
                 limit=20, order_by='Invalid', extended=False, id_only=False, count=False
             )
         self.assertEqual('ERROR: invalid sort option', cm.exception.code)
@@ -40,8 +37,7 @@ class TestSets(unittest.TestCase):
     def test_getSets_whenLimitIsInvalid(self):
         with self.assertRaises(SystemExit) as cm:
             sets.get_sets(
-                query=None, id=None, set_number=None, theme=None, subtheme=None,
-                year=None, tag=None, owned=False, wanted=False, updated_since=None,
+                sets.SetFilters(),
                 limit=501, order_by=None, extended=False, id_only=False, count=False
             )
         self.assertEqual('ERROR: limit must be between 1 and 500', cm.exception.code)
@@ -52,8 +48,7 @@ class TestSets(unittest.TestCase):
     def test_getSets_whenCountOnly(self, mock_api, mock_print, mock_update_cache):
         mock_api.return_value = {'sets': [], 'matches': 42}
         sets.get_sets(
-            query='star wars', id=None, set_number=None, theme=None, subtheme=None,
-            year=None, tag=None, owned=False, wanted=False, updated_since=None,
+            sets.SetFilters(query='star wars'),
             limit=20, order_by=None, extended=False, id_only=False, count=True
         )
         mock_api.assert_called_once_with('getSets', include_hash=True, params={'query': 'star wars', 'pageSize': 0})
@@ -65,8 +60,7 @@ class TestSets(unittest.TestCase):
     def test_getSets_whenIdOnly(self, mock_api, mock_print, mock_update_cache):
         mock_api.return_value = {'sets': [{'setID': '789'}], 'matches': 1}
         sets.get_sets(
-            query='star wars', id=None, set_number=None, theme=None, subtheme=None,
-            year=None, tag=None, owned=False, wanted=False, updated_since=None,
+            sets.SetFilters(query='star wars'),
             limit=20, order_by=None, extended=False, id_only=True, count=False
         )
         mock_print.assert_called_once_with('789')
