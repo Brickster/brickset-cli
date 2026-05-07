@@ -74,7 +74,7 @@ if __name__ == '__main__':
     sets_parser.add_argument('--updated-since', help='Update since')
 
     # result formatting
-    sets_parser.add_argument('--limit', '-l', '-n', help='Limit returned results to n', default=20)
+    sets_parser.add_argument('--limit', '-l', '-n', type=int, help='Limit returned results to n (1-500)', default=20)
     sets_parser.add_argument('--order-by', help='Order sets by')
     details_group = sets_parser.add_mutually_exclusive_group()
     details_group.add_argument('--extended', action='store_true', help='Included extended fields')

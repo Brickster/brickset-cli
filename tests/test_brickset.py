@@ -10,3 +10,8 @@ class TestBrickset(unittest.TestCase):
     def test_help(self):
         help_output = subprocess.check_output([_BIN, '-h'], text=True)
         self.assertTrue(help_output.startswith('usage: brickset'))
+
+    def test_sets_limit_rejectsNonInteger(self):
+        result = subprocess.run([_BIN, 'sets', '--limit', 'foo'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('invalid int value', result.stderr)
