@@ -187,14 +187,19 @@ if __name__ == '__main__':
         usage='''brickset collection minifigs TODO'''
     )
     collection_minifigs_parser.add_argument('id', help='Brickset minifig number', metavar='MINIFIG_NUMBER')
-    # TODO(#18): require at least one flag
     collection_minifigs_parser.add_argument(
         '--owned', '-o', nargs='?', default=None, const=1, help='quantity owned'
     )
     wanted_parser = collection_minifigs_parser.add_mutually_exclusive_group()
     wanted_parser.add_argument('--wanted', '-w', action='store_true', default=None, help='set wanted')
     wanted_parser.add_argument('--not-wanted', '-W', action='store_false', dest='wanted', help='set not wanted')
-    collection_minifigs_parser.set_defaults(func=minifigs.update_minifig)
+
+    def _validate_collection_minifigs(**kwargs):
+        if all(kwargs.get(k) is None for k in ['owned', 'wanted']):
+            collection_minifigs_parser.error('at least one of --owned, --wanted, --not-wanted is required')
+        minifigs.update_minifig(**kwargs)
+
+    collection_minifigs_parser.set_defaults(func=_validate_collection_minifigs)
 
     parsed_args = vars(parser.parse_args())
     func = parsed_args.pop('func')
