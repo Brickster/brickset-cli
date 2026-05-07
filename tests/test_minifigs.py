@@ -51,6 +51,22 @@ class TestMinifigs(unittest.TestCase):
 
         mock_api.assert_called_once_with('getMinifigCollection', include_hash=True, params={'query': 'vader'})
 
-    @unittest.skip('not implemented')
-    def test_updateMinifig(self):
-        pass
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateMinifig_whenOwned1(self, mock_api):
+        minifigs.update_minifig('sw0001', owned=1, wanted=None)
+        mock_api.assert_called_once_with('setMinifigCollection', include_hash=True, minifigNumber='sw0001', params={'own': 1})
+
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateMinifig_whenQtyOwned(self, mock_api):
+        minifigs.update_minifig('sw0001', owned=5, wanted=None)
+        mock_api.assert_called_once_with('setMinifigCollection', include_hash=True, minifigNumber='sw0001', params={'qtyOwned': 5})
+
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateMinifig_whenWanted(self, mock_api):
+        minifigs.update_minifig('sw0001', owned=None, wanted=True)
+        mock_api.assert_called_once_with('setMinifigCollection', include_hash=True, minifigNumber='sw0001', params={'want': 1})
+
+    @mock.patch('brickset.api.execute_api_request')
+    def test_updateMinifig_whenNotWanted(self, mock_api):
+        minifigs.update_minifig('sw0001', owned=None, wanted=False)
+        mock_api.assert_called_once_with('setMinifigCollection', include_hash=True, minifigNumber='sw0001', params={'want': 0})

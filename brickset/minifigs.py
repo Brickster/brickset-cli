@@ -17,4 +17,12 @@ def get_minifigs(owned, wanted, query):
 
 
 def update_minifig(id, owned, wanted):
-    print('TODO: update_minifig: id={} owned={}, wanted={}'.format(id, owned, wanted))
+    params = {}
+    if owned is not None:
+        if owned == 1:
+            params['own'] = owned
+        else:
+            params['qtyOwned'] = owned
+    if wanted is not None:
+        params['want'] = 1 if wanted else 0
+    api.execute_api_request('setMinifigCollection', include_hash=True, minifigNumber=id, params=params)
