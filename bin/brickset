@@ -59,7 +59,6 @@ if __name__ == '__main__':
     # ------------------------------------------
     sets_parser = subparsers.add_parser('sets', help='get sets', description='get sets')
 
-    # TODO(#13): require one filtering parameter
     identifier_group = sets_parser.add_mutually_exclusive_group()
     identifier_group.add_argument('--id', help='Brickset ID')
     identifier_group.add_argument('--set-number', '--number', nargs='+', help='Set number')
@@ -85,7 +84,10 @@ if __name__ == '__main__':
 
     def _dispatch_get_sets(**kwargs):
         filter_fields = sets.SetFilters.__dataclass_fields__
-        filters = sets.SetFilters(**{k: kwargs.pop(k) for k in list(filter_fields) if k in kwargs})
+        filter_kwargs = {k: kwargs.pop(k) for k in list(filter_fields) if k in kwargs}
+        if not any(filter_kwargs.values()):
+            sets_parser.error('at least one filter is required')
+        filters = sets.SetFilters(**filter_kwargs)
         sets.get_sets(filters, **kwargs)
 
     sets_parser.set_defaults(func=_dispatch_get_sets)
