@@ -15,3 +15,8 @@ class TestBrickset(unittest.TestCase):
         result = subprocess.run([_BIN, 'sets', '--limit', 'foo'], capture_output=True, text=True)
         self.assertEqual(2, result.returncode)
         self.assertIn('invalid int value', result.stderr)
+
+    def test_minifigs_requiresAtLeastOneFilter(self):
+        result = subprocess.run([_BIN, 'minifigs'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('at least one of --owned, --wanted, --query is required', result.stderr)

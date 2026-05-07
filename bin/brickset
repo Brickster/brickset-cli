@@ -97,8 +97,12 @@ if __name__ == '__main__':
     minifig_parser.add_argument('--owned', '-o', action='store_true', help='Include owned minifigs')
     minifig_parser.add_argument('--wanted', '-w', action='store_true', help='Include wanted minifigs')
     minifig_parser.add_argument('--query', '-q', help='Query by minifig name or number')
-    # TODO(#14): at least one filter is required
-    minifig_parser.set_defaults(func=minifigs.get_minifigs)
+    def _validate_minifigs(**kwargs):
+        if not any([kwargs.get('owned'), kwargs.get('wanted'), kwargs.get('query')]):
+            minifig_parser.error('at least one of --owned, --wanted, --query is required')
+        minifigs.get_minifigs(**kwargs)
+
+    minifig_parser.set_defaults(func=_validate_minifigs)
 
     # ------------------------------------------
     # INSTRUCTIONS
