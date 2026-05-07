@@ -26,6 +26,20 @@ class TestBrickset(unittest.TestCase):
         self.assertEqual(2, result.returncode)
         self.assertIn('at least one of --owned, --wanted, --query is required', result.stderr)
 
+    def test_collectionSets_rating_rejectsOutOfRange(self):
+        result = subprocess.run([_BIN, 'collection', 'sets', '12345', '--rating', '6'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('invalid choice: 6', result.stderr)
+
+    def test_collectionSets_rating_rejectsNegative(self):
+        result = subprocess.run([_BIN, 'collection', 'sets', '12345', '--rating', '-1'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+
+    def test_collectionSets_rating_rejectsNonInteger(self):
+        result = subprocess.run([_BIN, 'collection', 'sets', '12345', '--rating', 'foo'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('invalid int value', result.stderr)
+
     def test_collectionSets_requiresAtLeastOneFlag(self):
         result = subprocess.run([_BIN, 'collection', 'sets', '12345'], capture_output=True, text=True)
         self.assertEqual(2, result.returncode)

@@ -173,7 +173,7 @@ if __name__ == '__main__':
     wanted_parser.add_argument('--wanted', '-w', action='store_true', default=None, help='set wanted')
     wanted_parser.add_argument('--not-wanted', '-W', action='store_false', dest='wanted', help='set not wanted')
     collection_sets_parser.add_argument('--notes', '-n', help='set notes')
-    collection_sets_parser.add_argument('--rating', '-r', help='set rating')  # TODO(#17): validate 1-5 (0?)
+    collection_sets_parser.add_argument('--rating', '-r', type=int, choices=range(0, 6), metavar='{0-5}', help='set rating (1-5, or 0 to unset)')
 
     def _validate_collection_sets(**kwargs):
         if all(kwargs.get(k) is None for k in ['owned', 'wanted', 'notes', 'rating']):
