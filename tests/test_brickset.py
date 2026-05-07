@@ -20,3 +20,8 @@ class TestBrickset(unittest.TestCase):
         result = subprocess.run([_BIN, 'minifigs'], capture_output=True, text=True)
         self.assertEqual(2, result.returncode)
         self.assertIn('at least one of --owned, --wanted, --query is required', result.stderr)
+
+    def test_collectionSets_requiresAtLeastOneFlag(self):
+        result = subprocess.run([_BIN, 'collection', 'sets', '12345'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('at least one of --owned, --wanted, --not-wanted, --notes, --rating is required', result.stderr)
