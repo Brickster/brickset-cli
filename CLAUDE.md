@@ -40,6 +40,10 @@ The project is a CLI wrapper around the [Brickset v3 API](https://brickset.com/a
   - `user.py` — `show_usage`, `log_in`
 - `bin/brickset` — CLI entry point (argparse); adds the project root to `sys.path` so `brickset` is importable as a package, then delegates everything to `brickset/`
 
+## Workflow
+
+After implementing a plan, suggest a commit message following [Conventional Commits](https://www.conventionalcommits.org/) format, max 72 characters.
+
 ## Key details
 
 **Instruction filename construction** (`instructions._construct_instruction_filename`) is complex — it parses LEGO's free-text instruction descriptions using a series of `@_rule`-decorated handlers to extract region codes (e.g. `V39`) and book numbers. There are 130+ parameterized test cases covering this. Do not simplify the regexes without running the full test suite.
