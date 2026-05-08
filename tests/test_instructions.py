@@ -334,10 +334,14 @@ class TestConstructInstructionFilename(unittest.TestCase):
             self._construct('60303_01_Build_Main', set_number='60303-1', cdn_filename='60303_01_Build_Main.pdf')
         )
 
-    def test_buildAlt(self):
+    @parameterized.expand([
+        ('withBI',      '31205_02_BI_Build_Alt', '31205-1', '31205-1_alt_02.pdf'),
+        ('withoutBI',   '42117_01_Build_Alt',    '42117-1', '42117-1_alt_01.pdf'),
+    ])
+    def test_buildAlt(self, _name, description, set_number, expected):
         self.assertEqual(
-            '31205-1_alt_02.pdf',
-            self._construct('31205_02_BI_Build_Alt', set_number='31205-1', cdn_filename='31205_02_BI_Build_Alt.pdf')
+            expected,
+            self._construct(description, set_number=set_number, cdn_filename=description + '.pdf')
         )
 
     def test_setShortDesc(self):

@@ -79,7 +79,7 @@ def _build_main(set_number, pdf_number, _match, _description):
     return '{}_{}.pdf'.format(set_number, pdf_number)
 
 
-@_rule(r'^\d+_(\d+)_BI_Build_Alt$', re.IGNORECASE)
+@_rule(r'^\d+_(\d+)_(?:BI_)?Build_Alt$', re.IGNORECASE)
 def _build_alt(set_number, _pdf_number, match, _description):
     return '{}_alt_{}.pdf'.format(set_number, match.group(1))
 
