@@ -37,7 +37,7 @@ class TestInstructions(unittest.TestCase):
         download_instruction('/tmp', '1234-1', instruction)
 
         mock_print.assert_called_once_with(
-            'WARN: Skipping unknown instruction URL format: https://www.lego.com/cdn/5678.pdf'
+            'WARN: Skipping unknown instruction format: "Unknown Format" https://www.lego.com/cdn/5678.pdf'
         )
 
     @mock.patch('brickset.cache.update_cache', return_value={'sets': {'123': '456-1', '456-1': '123'}})

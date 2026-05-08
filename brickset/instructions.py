@@ -135,7 +135,7 @@ def download_instruction(directory, set_number, instruction):
     url = instruction['URL']
     filename = _construct_instruction_filename(set_number, instruction['description'], url)
     if not filename:
-        print('WARN: Skipping unknown instruction URL format: {}'.format(url))
+        print('WARN: Skipping unknown instruction format: "{}" {}'.format(instruction['description'], url))
         return
     print('Downloading "{}" {} as {}'.format(instruction['description'], url, filename))
     r = requests.get(url)
