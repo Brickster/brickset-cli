@@ -89,6 +89,17 @@ def _set_short_desc(set_number, _pdf_number, _match, description):
     return '{}_{}.pdf'.format(set_number, hashlib.sha256(description.encode('utf-8')).hexdigest()[0:8])
 
 
+@_rule(r'^INSPIRATIONAL MATERIAL,.*?\s+(IN|NA|V/?[\.\s]*\d+(?:(?:/|\s[+&]\s)V?\d+)*)$', re.IGNORECASE)
+def _inspirational_material_region(set_number, pdf_number, match, _description):
+    region = _clean_region(match.group(1))
+    return '{}_{}_{}.pdf'.format(set_number, region, pdf_number)
+
+
+@_rule(r'^INSPIRATIONAL MATERIAL,', re.IGNORECASE)
+def _inspirational_material(set_number, pdf_number, _match, _description):
+    return '{}_{}.pdf'.format(set_number, pdf_number)
+
+
 @_rule(r'^(?:BI|BUI?LDING\s*INSTRUCTION).*?[\s-]+(\d+)$')
 def _other(set_number, pdf_number, _match, _description):
     return '{}_{}.pdf'.format(set_number, pdf_number)

@@ -347,6 +347,13 @@ class TestConstructInstructionFilename(unittest.TestCase):
         )
 
     @parameterized.expand([
+        ('noRegion',    'INSPIRATIONAL MATERIAL, 40606',      '40606-1',  '6439688.pdf',  '40606-1_6439688.pdf'),
+        ('withRegion',  'INSPIRATIONAL MATERIAL, 40606 V39',  '40606-1',  '6439713.pdf',  '40606-1_v39_6439713.pdf'),
+    ])
+    def test_inspirationalMaterial(self, _name, description, set_number, cdn_filename, expected):
+        self.assertEqual(expected, self._construct(description, set_number, cdn_filename=cdn_filename))
+
+    @parameterized.expand([
         ('BI 1433',                     '1234-1_5678.pdf'),
         ('BI 3002/24 - 3838',           '1234-1_5678.pdf'),
         ('BI 3004/24 -3874',            '1234-1_5678.pdf'),
