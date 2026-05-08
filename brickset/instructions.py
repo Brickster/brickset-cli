@@ -79,6 +79,11 @@ def _build_main(set_number, pdf_number, _match, _description):
     return '{}_{}.pdf'.format(set_number, pdf_number)
 
 
+@_rule(r'^\d+_(\d+)_BI_Build_Alt$', re.IGNORECASE)
+def _build_alt(set_number, _pdf_number, match, _description):
+    return '{}_alt_{}.pdf'.format(set_number, match.group(1))
+
+
 @_rule(r'\d+_[a-z]+', re.IGNORECASE)
 def _set_short_desc(set_number, _pdf_number, _match, description):
     return '{}_{}.pdf'.format(set_number, hashlib.sha256(description.encode('utf-8')).hexdigest()[0:8])
