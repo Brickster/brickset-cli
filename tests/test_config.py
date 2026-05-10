@@ -7,21 +7,20 @@ from brickset import config
 
 class TestConfig(unittest.TestCase):
 
-    @mock.patch('builtins.open', mock.mock_open())
-    @mock.patch('os.path.exists', return_value=True)
+    @mock.patch('pathlib.Path.exists', return_value=True)
     def test_getConfig(self, mock_exists):
         mock_open = mock.mock_open(read_data=json.dumps({'api_key': 'abc123'}))
         with mock.patch('builtins.open', mock_open):
             result = config.get_config()
         self.assertEqual({'api_key': 'abc123'}, result)
 
-    @mock.patch('os.path.exists', return_value=False)
+    @mock.patch('pathlib.Path.exists', return_value=False)
     def test_getConfig_whenNoConfigExists(self, mock_exists):
         with self.assertRaises(SystemExit) as cm:
             config.get_config()
         self.assertEqual('ERROR: no config exists. Run: brickset config API_KEY', cm.exception.code)
 
-    @mock.patch('os.path.exists', return_value=True)
+    @mock.patch('pathlib.Path.exists', return_value=True)
     def test_configure(self, mock_exists):
         mock_open = mock.mock_open()
         with mock.patch('builtins.open', mock_open):
@@ -30,8 +29,8 @@ class TestConfig(unittest.TestCase):
         written = ''.join(c.args[0] for c in mock_open().write.call_args_list)
         self.assertEqual(json.dumps({'api_key': 'abc123'}), written)
 
-    @mock.patch('os.mkdir')
-    @mock.patch('os.path.exists', return_value=False)
+    @mock.patch('pathlib.Path.mkdir')
+    @mock.patch('pathlib.Path.exists', return_value=False)
     def test_configure_whenDirectoryDoesNotExist(self, mock_exists, mock_mkdir):
         with mock.patch('builtins.open', mock.mock_open()):
             config.configure('abc123')

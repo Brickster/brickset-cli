@@ -34,5 +34,5 @@ def log_in():
     user_hash_json = api.execute_api_request('login', username=username, password=password)
 
     brickset_config['hash'] = user_hash_json['hash']
-    with open(_config_directory() + _CONFIG_FILENAME, 'w') as config_file:
+    with open(_config_directory() / _CONFIG_FILENAME, 'w') as config_file:
         json.dump(brickset_config, config_file)

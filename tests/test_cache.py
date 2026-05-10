@@ -7,12 +7,12 @@ from brickset import cache
 
 class TestCache(unittest.TestCase):
 
-    @mock.patch('os.path.exists', return_value=False)
+    @mock.patch('pathlib.Path.exists', return_value=False)
     def test_getCache_whenNoCacheExists(self, mock_exists):
         result = cache.get_cache()
         self.assertEqual({'sets': {}}, result)
 
-    @mock.patch('os.path.exists', return_value=True)
+    @mock.patch('pathlib.Path.exists', return_value=True)
     def test_getCache(self, mock_exists):
         cache_data = {'sets': {'123': '456-1', '456-1': '123'}}
         with mock.patch('builtins.open', mock.mock_open(read_data=json.dumps(cache_data))):

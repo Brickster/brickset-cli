@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from brickset import user
@@ -54,7 +55,7 @@ class TestUser(unittest.TestCase):
         user.show_usage('TODAY')
         mock_print.assert_not_called()
 
-    @mock.patch('brickset.user._config_directory', return_value='/tmp/')
+    @mock.patch('brickset.user._config_directory', return_value=Path('/tmp'))
     @mock.patch('brickset.user.get_config', return_value={'api_key': 'test-key'})
     @mock.patch('brickset.user.api.execute_api_request', return_value={'hash': 'user-hash-123'})
     @mock.patch('getpass.getpass', return_value='testpass')
@@ -64,7 +65,7 @@ class TestUser(unittest.TestCase):
             user.log_in()
 
         mock_api.assert_called_once_with('login', username='testuser', password='testpass')
-        mock_open.assert_called_once_with('/tmp/config', 'w')
+        mock_open.assert_called_once_with(Path('/tmp') / 'config', 'w')
         handle = mock_open()
         written = ''.join(call.args[0] for call in handle.write.call_args_list)
         self.assertIn('user-hash-123', written)

@@ -1,6 +1,7 @@
 import hashlib
 import re
 import requests
+from pathlib import Path
 
 from . import api
 from .cache import id_to_set_number_generator, set_number_to_id_generator
@@ -132,7 +133,7 @@ def get_instructions(id, directory, set_number=None):
         if not instructions_json['instructions']:
             print(f'No instructions found for {cur_set_number} ({set_id})')
             if directory:
-                with open(f'{directory}/{cur_set_number}_noinstructions.txt', 'wb'):
+                with open(Path(directory) / f'{cur_set_number}_noinstructions.txt', 'wb'):
                     pass
             continue
 
@@ -157,5 +158,5 @@ def download_instruction(directory, set_number, instruction):
         return
     print(f'Downloading "{instruction["description"]}" {url} as {filename}')
     r = requests.get(url)
-    with open(f'{directory}/{filename}', 'wb') as f:
+    with open(Path(directory) / filename, 'wb') as f:
         f.write(r.content)

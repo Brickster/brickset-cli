@@ -1,5 +1,4 @@
 import json
-import os
 
 from . import api
 from .config import _config_directory
@@ -8,15 +7,15 @@ _CACHE_FILENAME = 'cache'
 
 
 def get_cache():
-    cache_file = _config_directory() + _CACHE_FILENAME
-    if not os.path.exists(cache_file):
+    cache_file = _config_directory() / _CACHE_FILENAME
+    if not cache_file.exists():
         return {'sets': {}}
     with open(cache_file, 'r') as f:
         return json.load(f)
 
 
 def save_cache(cache):
-    with open(_config_directory() + _CACHE_FILENAME, 'w') as f:
+    with open(_config_directory() / _CACHE_FILENAME, 'w') as f:
         json.dump(cache, f, indent=2)
 
 
