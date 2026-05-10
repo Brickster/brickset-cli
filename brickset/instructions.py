@@ -138,9 +138,11 @@ def get_instructions(id, directory, set_number=None):
 
         fetched = instructions_json['instructions']
         if directory:
-            [download_instruction(directory, cur_set_number, i) for i in fetched]
+            for i in fetched:
+                download_instruction(directory, cur_set_number, i)
         else:
-            [_print_instruction(cur_set_number, i) for i in fetched]
+            for i in fetched:
+                _print_instruction(cur_set_number, i)
 
 
 def _print_instruction(set_number, instruction):

@@ -108,7 +108,8 @@ def get_sets(filters: SetFilters, limit, order_by, extended, id_only, count):
     if count:
         print(sets_json['matches'])
     else:
-        [_print_set(lego_set, id_only) for lego_set in sets_json['sets']]
+        for lego_set in sets_json['sets']:
+            _print_set(lego_set, id_only)
 
 
 def update_set(id, owned, wanted, notes, rating):
