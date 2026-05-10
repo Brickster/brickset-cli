@@ -35,7 +35,7 @@ def _get_set_number(set_id):
     if set_id not in cache['sets']:
         sets_json = api.execute_api_request('getSets', include_hash=True, params={'setID': set_id})
         cache = update_cache(sets_json['sets'])
-    return cache['sets'].get(set_id, None)
+    return cache['sets'].get(set_id)
 
 
 def _get_id(set_number):
@@ -43,7 +43,7 @@ def _get_id(set_number):
     if set_number not in cache['sets']:
         sets_json = api.execute_api_request('getSets', include_hash=True, params={'setNumber': set_number})
         cache = update_cache(sets_json['sets'], cache)
-    return cache['sets'].get(set_number, None)
+    return cache['sets'].get(set_number)
 
 
 def id_to_set_number_generator(ids):
