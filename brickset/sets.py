@@ -87,6 +87,9 @@ _VALID_SORTS = [
     'CollectionID'
 ]
 
+_ISO_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+_VALID_ORDER_BY_RE = re.compile('^(' + '|'.join(_VALID_SORTS) + ')$', re.IGNORECASE)
+
 
 def get_sets(filters: SetFilters, limit, order_by, extended, id_only, count):
     # NOTE: userHash is always required despite documentation saying it is optional unless using collection filters
@@ -158,7 +161,7 @@ def _is_valid_limit(limit):
 
 
 def _is_iso8601_date(updated_since):
-    if not re.compile('^\\d{4}-\\d{2}-\\d{2}$').match(updated_since):
+    if not _ISO_DATE_RE.match(updated_since):
         sys.exit('ERROR: updated_since must have format yyyy-MM-dd')
     return True
 
@@ -181,7 +184,6 @@ def _print_set(lego_set, id_only):
 
 
 def _is_valid_order_by(order_by):
-    for valid_sort in _VALID_SORTS:
-        if re.compile(f'^{valid_sort}$', flags=re.IGNORECASE).match(order_by):
-            return True
-    sys.exit('ERROR: invalid sort option')
+    if not _VALID_ORDER_BY_RE.match(order_by):
+        sys.exit('ERROR: invalid sort option')
+    return True

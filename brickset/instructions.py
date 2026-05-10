@@ -6,19 +6,23 @@ from pathlib import Path
 from . import api
 from .cache import id_to_set_number_generator, set_number_to_id_generator
 
+_PDF_URL_RE = re.compile(r'^https://www\.lego\.com.*/(.*)\.pdf$')
+_PDF_NUMBER_RE = re.compile(r'^\d+$')
+_PDF_BUILD_MAIN_RE = re.compile(r'^(\d+)_(\d+)_build_main$')
+
 
 def _parse_pdf_number(instruction_url):
-    match = re.compile(r'^https://www\.lego\.com.*/(.*)\.pdf$').match(instruction_url)
+    match = _PDF_URL_RE.match(instruction_url)
     if match:
         pdf_name = match.group(1).lower()
 
         # just a number
-        match = re.compile(r'^\d+$').match(pdf_name)
+        match = _PDF_NUMBER_RE.match(pdf_name)
         if match:
             return pdf_name
 
         # main build
-        match = re.compile(r'^(\d+)_(\d+)_build_main$').match(pdf_name)
+        match = _PDF_BUILD_MAIN_RE.match(pdf_name)
         if match:
             return match.group(1) + match.group(2)
     return None
