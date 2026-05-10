@@ -19,10 +19,10 @@ def execute_api_request(api, include_hash=False, **kwargs):
     response = requests.get(_API + '/' + api, params=params)
     if response.status_code != 200:
         print(response.text)
-        sys.exit('ERROR: {} API returned an unexpected error'.format(api))
+        sys.exit(f'ERROR: {api} API returned an unexpected error')
     response_json = response.json()
     if response_json['status'] != 'success':
         print(response.text)
-        sys.exit('ERROR: {} API returned an unexpected error'.format(api))
+        sys.exit(f'ERROR: {api} API returned an unexpected error')
 
     return response_json

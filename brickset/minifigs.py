@@ -11,7 +11,7 @@ def get_minifigs(owned, wanted, query):
         params['query'] = query
     minifigs_json = api.execute_api_request('getMinifigCollection', include_hash=True, params=params)
     for minifig in minifigs_json['minifigs']:
-        print('{}: "{}" '.format(minifig['minifigNumber'], minifig['name']))
+        print(f'{minifig["minifigNumber"]}: "{minifig["name"]}" ')
 
 
 def update_minifig(id, owned, wanted):

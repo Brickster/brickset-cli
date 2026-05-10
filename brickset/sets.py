@@ -132,24 +132,20 @@ def get_themes(theme):
     themes_json = api.execute_api_request('getThemes')
     for a_theme in themes_json['themes']:
         if theme is None or re.search(theme, a_theme['theme'], flags=re.IGNORECASE):
-            print('{} ({}-{}): {} set(s), {} subtheme(s)'.format(
-                a_theme['theme'], a_theme['yearFrom'], a_theme['yearTo'], a_theme['setCount'], a_theme['subthemeCount']
-            ))
+            print(f'{a_theme["theme"]} ({a_theme["yearFrom"]}-{a_theme["yearTo"]}): {a_theme["setCount"]} set(s), {a_theme["subthemeCount"]} subtheme(s)')
 
 
 def get_subthemes(theme, subtheme=None):
     subthemes_json = api.execute_api_request('getSubthemes', Theme=theme)
     for a_subtheme in subthemes_json['subthemes']:
         if subtheme is None or re.search(subtheme, a_subtheme['subtheme'], flags=re.IGNORECASE):
-            print('{} ({}-{}): {} set(s)'.format(
-                a_subtheme['subtheme'], a_subtheme['yearFrom'], a_subtheme['yearTo'], a_subtheme['setCount']
-            ))
+            print(f'{a_subtheme["subtheme"]} ({a_subtheme["yearFrom"]}-{a_subtheme["yearTo"]}): {a_subtheme["setCount"]} set(s)')
 
 
 def get_years(theme):
     years_json = api.execute_api_request('getYears', Theme=theme)
     for year in years_json['years']:
-        print('{}: {}'.format(year['year'], year['setCount']))
+        print(f'{year["year"]}: {year["setCount"]}')
 
 
 def _is_valid_limit(limit):
@@ -178,19 +174,14 @@ def _print_set(lego_set, id_only):
     if lego_set['collection']['wanted']:
         collection_details.append('wanted')
 
-    set_details = '{}-{} {} {}'.format(
-        lego_set['number'],
-        lego_set['numberVariant'],
-        lego_set['setID'],
-        lego_set['name']
-    )
+    set_details = f'{lego_set["number"]}-{lego_set["numberVariant"]} {lego_set["setID"]} {lego_set["name"]}'
     if collection_details:
-        set_details = set_details + ' (' + ', '.join(collection_details) + ')'
+        set_details = f'{set_details} ({", ".join(collection_details)})'
     print(set_details)
 
 
 def _is_valid_order_by(order_by):
     for valid_sort in _VALID_SORTS:
-        if re.compile('^{}$'.format(valid_sort), flags=re.IGNORECASE).match(order_by):
+        if re.compile(f'^{valid_sort}$', flags=re.IGNORECASE).match(order_by):
             return True
     sys.exit('ERROR: invalid sort option')
