@@ -159,32 +159,36 @@ class TestSets(unittest.TestCase):
             mock.call('2006: 34')
         ])
 
-    def test__isValidLimit_whenValid(self):
-        self.assertTrue(sets._is_valid_limit(1))
-        self.assertTrue(sets._is_valid_limit(20))
-        self.assertTrue(sets._is_valid_limit(500))
+    def test__validateLimit_whenValid(self):
+        # no SystemExit thrown
+        sets._validate_limit(1)
+        sets._validate_limit(20)
+        sets._validate_limit(500)
+        sets._validate_limit(None)
 
-    def test__isValidLimit_whenAboveMax(self):
+    def test__validateLimit_whenAboveMax(self):
         with self.assertRaises(SystemExit) as cm:
-            sets._is_valid_limit(501)
+            sets._validate_limit(501)
         self.assertEqual('ERROR: limit must be between 1 and 500', cm.exception.code)
 
-    def test__isValidLimit_whenBelowMin(self):
+    def test__validateLimit_whenBelowMin(self):
         with self.assertRaises(SystemExit) as cm:
-            sets._is_valid_limit(0)
+            sets._validate_limit(0)
         self.assertEqual('ERROR: limit must be between 1 and 500', cm.exception.code)
 
-    def test__isValidLimit_whenNotAnInteger(self):
+    def test__validateLimit_whenNotAnInteger(self):
         with self.assertRaises(SystemExit) as cm:
-            sets._is_valid_limit('abc')
+            sets._validate_limit('abc')
         self.assertEqual('ERROR: limit must be an integer', cm.exception.code)
 
-    def test__isIso8601Date_whenValid(self):
-        self.assertTrue(sets._is_iso8601_date('2020-05-05'))
+    def test__validateIso8601Date_whenValid(self):
+        # no SystemExit thrown
+        sets._validate_iso8601_date('2020-05-05')
+        sets._validate_iso8601_date(None)
 
-    def test__isIso8601Date_whenInvalid(self):
+    def test__validateIso8601Date_whenInvalid(self):
         with self.assertRaises(SystemExit) as cm:
-            sets._is_iso8601_date('May 5, 2020')
+            sets._validate_iso8601_date('May 5, 2020')
         self.assertEqual('ERROR: updated_since must have format yyyy-MM-dd', cm.exception.code)
 
     @mock.patch('builtins.print')
@@ -204,36 +208,15 @@ class TestSets(unittest.TestCase):
         sets._print_set({'setID': '789'}, True)
         mock_print.assert_called_once_with('789')
 
-    def test__isValidOrderBy_whenValid(self):
-        self.assertTrue(sets._is_valid_order_by('YearFromDESC'))
-        self.assertTrue(sets._is_valid_order_by('yearfromdesc'))
+    def test__validateOrderBy_whenValid(self):
+        # no SystemExit thrown
+        sets._validate_order_by('YearFromDESC')
+        sets._validate_order_by('yearfromdesc')
 
-    def test__isValidOrderBy_whenInvalid(self):
+    def test__validateOrderBy_whenInvalid(self):
         with self.assertRaises(SystemExit) as cm:
-            sets._is_valid_order_by('ThemeDESC')
+            sets._validate_order_by('ThemeDESC')
         self.assertEqual('ERROR: invalid sort option', cm.exception.code)
-
-    def test_buildFilterParams_allFields(self):
-        filters = sets.SetFilters(
-            id='123',
-            set_number=['456-1', '789-1'],
-            theme=['Star Wars', 'City'],
-            subtheme=['Clone Wars'],
-            year=['2020', '2021'],
-            tag='exclusive',
-            owned=True,
-            wanted=True,
-        )
-        self.assertEqual({
-            'setID': '123',
-            'setNumber': '456-1,789-1',
-            'theme': 'Star Wars,City',
-            'subtheme': 'Clone Wars',
-            'year': '2020,2021',
-            'tag': 'exclusive',
-            'owned': 1,
-            'wanted': 1,
-        }, sets._build_filter_params(filters))
 
     @mock.patch('brickset.cache.update_cache')
     @mock.patch('builtins.print')
@@ -273,12 +256,6 @@ class TestSets(unittest.TestCase):
         mock_api.assert_called_once_with('getSets', include_hash=True, params={
             'extendedData': 1, 'pageSize': 20
         })
-
-    @mock.patch('brickset.sets._is_valid_limit', return_value=False)
-    def test_getSets_whenLimitValidationReturnsFalse(self, _mock):
-        self.assertIsNone(sets.get_sets(
-            sets.SetFilters(), limit=20, order_by=None, extended=False, id_only=False, count=False
-        ))
 
     @mock.patch('brickset.api.execute_api_request')
     def test_updateSet_whenOwned1(self, mock_api):

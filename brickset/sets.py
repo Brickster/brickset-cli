@@ -21,21 +21,6 @@ class SetFilters:
     updated_since: str | None = None
 
 
-def _build_filter_params(filters: SetFilters) -> dict[str, Any]:
-    candidates: dict[str, Any] = {
-        'query': filters.query,
-        'setID': filters.id,
-        'setNumber': ','.join(filters.set_number) if filters.set_number else None,
-        'theme': ','.join(filters.theme) if filters.theme else None,
-        'subtheme': ','.join(filters.subtheme) if filters.subtheme else None,
-        'year': ','.join(filters.year) if filters.year else None,
-        'tag': filters.tag,
-        'owned': 1 if filters.owned else None,
-        'wanted': 1 if filters.wanted else None,
-    }
-    return {k: v for k, v in candidates.items() if v is not None}
-
-
 _VALID_SORTS = [
     'Number',
     'YearFrom',
@@ -85,19 +70,25 @@ _VALID_ORDER_BY_RE = re.compile('^(' + '|'.join(_VALID_SORTS) + ')$', re.IGNOREC
 
 def get_sets(filters: SetFilters, limit: int, order_by: str | None, extended: bool, id_only: bool, count: bool) -> None:
     # NOTE: userHash is always required despite documentation saying it is optional unless using collection filters
-    params = _build_filter_params(filters)
-    if filters.updated_since and _is_iso8601_date(filters.updated_since):
-        params['updatedSince'] = filters.updated_since
-    if order_by and _is_valid_order_by(order_by):
-        params['orderBy'] = order_by
-    if extended:
-        params['extendedData'] = 1
-    if count:
-        params['pageSize'] = 0
-    else:
-        if not _is_valid_limit(limit):
-            return
-        params['pageSize'] = limit
+    _validate_iso8601_date(filters.updated_since)
+    _validate_order_by(order_by)
+    _validate_limit(limit)
+
+    params: dict[str, Any] = {k: v for k, v in {
+        'query': filters.query,
+        'setID': filters.id,
+        'setNumber': ','.join(filters.set_number) if filters.set_number else None,
+        'theme': ','.join(filters.theme) if filters.theme else None,
+        'subtheme': ','.join(filters.subtheme) if filters.subtheme else None,
+        'year': ','.join(filters.year) if filters.year else None,
+        'tag': filters.tag,
+        'owned': 1 if filters.owned else None,
+        'wanted': 1 if filters.wanted else None,
+        'updatedSince': filters.updated_since,
+        'orderBy': order_by,
+        'extendedData': 1 if extended else None,
+        'pageSize': 0 if count else limit,
+    }.items() if v is not None}
     sets_json = api.execute_api_request('getSets', include_hash=True, params=params)
     cache.update_cache(sets_json['sets'])
     if count:
@@ -143,21 +134,6 @@ def get_years(theme: str) -> None:
         print(f'{year["year"]}: {year["setCount"]}')
 
 
-def _is_valid_limit(limit: int) -> bool:
-    try:
-        if not 1 <= int(limit) <= 500:
-            sys.exit('ERROR: limit must be between 1 and 500')
-    except (TypeError, ValueError):
-        sys.exit('ERROR: limit must be an integer')
-    return True
-
-
-def _is_iso8601_date(updated_since: str) -> bool:
-    if not _ISO_DATE_RE.match(updated_since):
-        sys.exit('ERROR: updated_since must have format yyyy-MM-dd')
-    return True
-
-
 def _print_set(lego_set: dict[str, Any], id_only: bool) -> None:
     if id_only:
         print(lego_set['setID'])
@@ -175,7 +151,19 @@ def _print_set(lego_set: dict[str, Any], id_only: bool) -> None:
     print(set_details)
 
 
-def _is_valid_order_by(order_by: str) -> bool:
-    if not _VALID_ORDER_BY_RE.match(order_by):
+def _validate_limit(limit: int | None) -> None:
+    try:
+        if limit is not None and not 1 <= int(limit) <= 500:
+            sys.exit('ERROR: limit must be between 1 and 500')
+    except (TypeError, ValueError):
+        sys.exit('ERROR: limit must be an integer')
+
+
+def _validate_iso8601_date(updated_since: str | None) -> None:
+    if updated_since is not None and not _ISO_DATE_RE.match(updated_since):
+        sys.exit('ERROR: updated_since must have format yyyy-MM-dd')
+
+
+def _validate_order_by(order_by: str | None) -> None:
+    if order_by is not None and not _VALID_ORDER_BY_RE.match(order_by):
         sys.exit('ERROR: invalid sort option')
-    return True
