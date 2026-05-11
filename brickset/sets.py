@@ -173,7 +173,7 @@ def _print_set(lego_set: dict[str, Any], id_only: bool) -> None:
 
     collection_details = []
     if lego_set['collection']['owned']:
-        collection_details.append(str(lego_set['collection']['qtyOwned']) + ' owned')
+        collection_details.append(f'{lego_set["collection"]["qtyOwned"]} owned')
     if lego_set['collection']['wanted']:
         collection_details.append('wanted')
 
