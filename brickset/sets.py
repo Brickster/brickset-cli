@@ -22,26 +22,18 @@ class SetFilters:
 
 
 def _build_filter_params(filters: SetFilters) -> dict[str, Any]:
-    params: dict[str, Any] = {}
-    if filters.query:
-        params['query'] = filters.query
-    if filters.id:
-        params['setID'] = filters.id
-    if filters.set_number:
-        params['setNumber'] = ','.join(filters.set_number)
-    if filters.theme:
-        params['theme'] = ','.join(filters.theme)
-    if filters.subtheme:
-        params['subtheme'] = ','.join(filters.subtheme)
-    if filters.year:
-        params['year'] = ','.join(filters.year)
-    if filters.tag:
-        params['tag'] = filters.tag
-    if filters.owned:
-        params['owned'] = 1
-    if filters.wanted:
-        params['wanted'] = 1
-    return params
+    candidates: dict[str, Any] = {
+        'query': filters.query,
+        'setID': filters.id,
+        'setNumber': ','.join(filters.set_number) if filters.set_number else None,
+        'theme': ','.join(filters.theme) if filters.theme else None,
+        'subtheme': ','.join(filters.subtheme) if filters.subtheme else None,
+        'year': ','.join(filters.year) if filters.year else None,
+        'tag': filters.tag,
+        'owned': 1 if filters.owned else None,
+        'wanted': 1 if filters.wanted else None,
+    }
+    return {k: v for k, v in candidates.items() if v is not None}
 
 
 _VALID_SORTS = [
