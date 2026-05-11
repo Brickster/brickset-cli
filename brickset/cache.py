@@ -48,10 +48,8 @@ def _get_id(set_number: str) -> str | None:
 
 
 def id_to_set_number_generator(ids: list[str]) -> Iterator[str | None]:
-    for i in ids:
-        yield _get_set_number(i)
+    yield from (_get_set_number(i) for i in ids)
 
 
 def set_number_to_id_generator(set_numbers: list[str]) -> Iterator[str | None]:
-    for n in set_numbers:
-        yield _get_id(n)
+    yield from (_get_id(n) for n in set_numbers)
