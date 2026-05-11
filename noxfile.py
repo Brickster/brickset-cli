@@ -11,6 +11,12 @@ def lint(session):
 
 
 @nox.session(python=PYTHON)
+def typecheck(session):
+    session.install("-r", "requirements-test.txt")
+    session.run("mypy", "brickset/")
+
+
+@nox.session(python=PYTHON)
 def tests(session):
     session.install("-r", "requirements-test.txt")
     session.run("coverage", "run", "-m", "pytest", "-v", *session.posargs)

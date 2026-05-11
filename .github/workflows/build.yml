@@ -33,6 +33,9 @@ jobs:
     - name: Run linter
       run: nox -s lint
 
+    - name: Run type checker
+      run: nox -s typecheck
+
     - name: Run tests with coverage
       run: nox -s tests
 

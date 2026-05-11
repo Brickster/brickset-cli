@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 import sys
 
@@ -6,7 +8,7 @@ from . import config
 _API = 'https://brickset.com/api/v3.asmx'
 
 
-def execute_api_request(api, include_hash=False, **kwargs):
+def execute_api_request(api: str, include_hash: bool = False, **kwargs: Any) -> dict[str, Any]:
     brickset_config = config.get_config()
     params = {'apiKey': brickset_config['api_key']}
     if include_hash:

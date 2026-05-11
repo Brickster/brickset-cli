@@ -1,4 +1,6 @@
 import json
+from collections.abc import Iterator
+from typing import Any
 
 from . import api
 from .config import _config_directory
@@ -6,7 +8,7 @@ from .config import _config_directory
 _CACHE_FILENAME = 'cache'
 
 
-def get_cache():
+def get_cache() -> dict[str, Any]:
     cache_file = _config_directory() / _CACHE_FILENAME
     if not cache_file.exists():
         return {'sets': {}}
@@ -14,12 +16,12 @@ def get_cache():
         return json.load(f)
 
 
-def save_cache(cache):
+def save_cache(cache: dict[str, Any]) -> None:
     with open(_config_directory() / _CACHE_FILENAME, 'w') as f:
         json.dump(cache, f, indent=2)
 
 
-def update_cache(sets, cache=None):
+def update_cache(sets: list[dict[str, Any]], cache: dict[str, Any] | None = None) -> dict[str, Any]:
     cache = get_cache() if cache is None else cache
     for lego_set in sets:
         set_number = lego_set['number'] + '-' + str(lego_set['numberVariant'])
@@ -29,7 +31,7 @@ def update_cache(sets, cache=None):
     return cache
 
 
-def _get_set_number(set_id):
+def _get_set_number(set_id: str) -> str | None:
     cache = get_cache()
     if set_id not in cache['sets']:
         sets_json = api.execute_api_request('getSets', include_hash=True, params={'setID': set_id})
@@ -37,7 +39,7 @@ def _get_set_number(set_id):
     return cache['sets'].get(set_id)
 
 
-def _get_id(set_number):
+def _get_id(set_number: str) -> str | None:
     cache = get_cache()
     if set_number not in cache['sets']:
         sets_json = api.execute_api_request('getSets', include_hash=True, params={'setNumber': set_number})
@@ -45,11 +47,11 @@ def _get_id(set_number):
     return cache['sets'].get(set_number)
 
 
-def id_to_set_number_generator(ids):
+def id_to_set_number_generator(ids: list[str]) -> Iterator[str | None]:
     for i in ids:
         yield _get_set_number(i)
 
 
-def set_number_to_id_generator(set_numbers):
+def set_number_to_id_generator(set_numbers: list[str]) -> Iterator[str | None]:
     for n in set_numbers:
         yield _get_id(n)

@@ -1,8 +1,10 @@
+from typing import Any
+
 from . import api
 
 
-def get_minifigs(owned, wanted, query):
-    params = {}
+def get_minifigs(owned: bool, wanted: bool, query: str | None) -> None:
+    params: dict[str, Any] = {}
     if owned:
         params['owned'] = 1
     if wanted:
@@ -14,7 +16,7 @@ def get_minifigs(owned, wanted, query):
         print(f'{minifig["minifigNumber"]}: "{minifig["name"]}" ')
 
 
-def update_minifig(id, owned, wanted):
+def update_minifig(id: str, owned: int | None, wanted: bool | None) -> None:
     params = {}
     if owned is not None:
         if owned == 1:

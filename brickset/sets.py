@@ -1,7 +1,7 @@
 import re
 import sys
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any
 
 from . import api
 from . import cache
@@ -9,20 +9,20 @@ from . import cache
 
 @dataclass
 class SetFilters:
-    query: Optional[str] = None
-    id: Optional[str] = None
-    set_number: Optional[List[str]] = None
-    theme: Optional[List[str]] = None
-    subtheme: Optional[List[str]] = None
-    year: Optional[List[str]] = None
-    tag: Optional[str] = None
+    query: str | None = None
+    id: str | None = None
+    set_number: list[str] | None = None
+    theme: list[str] | None = None
+    subtheme: list[str] | None = None
+    year: list[str] | None = None
+    tag: str | None = None
     owned: bool = False
     wanted: bool = False
-    updated_since: Optional[str] = None
+    updated_since: str | None = None
 
 
-def _build_filter_params(filters: SetFilters) -> dict:
-    params = {}
+def _build_filter_params(filters: SetFilters) -> dict[str, Any]:
+    params: dict[str, Any] = {}
     if filters.query:
         params['query'] = filters.query
     if filters.id:
@@ -91,7 +91,7 @@ _ISO_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 _VALID_ORDER_BY_RE = re.compile('^(' + '|'.join(_VALID_SORTS) + ')$', re.IGNORECASE)
 
 
-def get_sets(filters: SetFilters, limit, order_by, extended, id_only, count):
+def get_sets(filters: SetFilters, limit: int, order_by: str | None, extended: bool, id_only: bool, count: bool) -> None:
     # NOTE: userHash is always required despite documentation saying it is optional unless using collection filters
     params = _build_filter_params(filters)
     if filters.updated_since and _is_iso8601_date(filters.updated_since):
@@ -115,8 +115,8 @@ def get_sets(filters: SetFilters, limit, order_by, extended, id_only, count):
             _print_set(lego_set, id_only)
 
 
-def update_set(id, owned, wanted, notes, rating):
-    params = {}
+def update_set(id: str, owned: int | None, wanted: bool | None, notes: str | None, rating: int | None) -> None:
+    params: dict[str, Any] = {}
     if owned is not None:
         if owned == 1:
             params['own'] = owned
@@ -131,27 +131,27 @@ def update_set(id, owned, wanted, notes, rating):
     api.execute_api_request('setCollection', include_hash=True, setID=id, params=params)
 
 
-def get_themes(theme):
+def get_themes(theme: str | None) -> None:
     themes_json = api.execute_api_request('getThemes')
     for a_theme in themes_json['themes']:
         if theme is None or re.search(theme, a_theme['theme'], flags=re.IGNORECASE):
             print(f'{a_theme["theme"]} ({a_theme["yearFrom"]}-{a_theme["yearTo"]}): {a_theme["setCount"]} set(s), {a_theme["subthemeCount"]} subtheme(s)')
 
 
-def get_subthemes(theme, subtheme=None):
+def get_subthemes(theme: str, subtheme: str | None = None) -> None:
     subthemes_json = api.execute_api_request('getSubthemes', Theme=theme)
     for a_subtheme in subthemes_json['subthemes']:
         if subtheme is None or re.search(subtheme, a_subtheme['subtheme'], flags=re.IGNORECASE):
             print(f'{a_subtheme["subtheme"]} ({a_subtheme["yearFrom"]}-{a_subtheme["yearTo"]}): {a_subtheme["setCount"]} set(s)')
 
 
-def get_years(theme):
+def get_years(theme: str) -> None:
     years_json = api.execute_api_request('getYears', Theme=theme)
     for year in years_json['years']:
         print(f'{year["year"]}: {year["setCount"]}')
 
 
-def _is_valid_limit(limit):
+def _is_valid_limit(limit: int) -> bool:
     try:
         if not 1 <= int(limit) <= 500:
             sys.exit('ERROR: limit must be between 1 and 500')
@@ -160,13 +160,13 @@ def _is_valid_limit(limit):
     return True
 
 
-def _is_iso8601_date(updated_since):
+def _is_iso8601_date(updated_since: str) -> bool:
     if not _ISO_DATE_RE.match(updated_since):
         sys.exit('ERROR: updated_since must have format yyyy-MM-dd')
     return True
 
 
-def _print_set(lego_set, id_only):
+def _print_set(lego_set: dict[str, Any], id_only: bool) -> None:
     if id_only:
         print(lego_set['setID'])
         return
@@ -183,7 +183,7 @@ def _print_set(lego_set, id_only):
     print(set_details)
 
 
-def _is_valid_order_by(order_by):
+def _is_valid_order_by(order_by: str) -> bool:
     if not _VALID_ORDER_BY_RE.match(order_by):
         sys.exit('ERROR: invalid sort option')
     return True

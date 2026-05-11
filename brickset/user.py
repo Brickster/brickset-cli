@@ -10,7 +10,7 @@ from .config import _config_directory, get_config
 _CONFIG_FILENAME = 'config'
 
 
-def show_usage(mode):
+def show_usage(mode: str) -> None:
     usage_json = api.execute_api_request('getKeyUsageStats')
     if mode == 'ALL':
         for usage_day in usage_json['apiKeyUsage']:
@@ -26,7 +26,7 @@ def show_usage(mode):
                 print(f'{today}: 0')
 
 
-def log_in():
+def log_in() -> None:
     username = input('Username: ')
     password = getpass.getpass('Password (only used to retrieve user hash): ')
 

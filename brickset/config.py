@@ -6,11 +6,11 @@ _BRICKSET_DIRECTORY = '.brickset'
 _CONFIG_FILENAME = 'config'
 
 
-def _config_directory():
+def _config_directory() -> Path:
     return Path.home() / _BRICKSET_DIRECTORY
 
 
-def get_config():
+def get_config() -> dict[str, str]:
     config_path = _config_directory() / _CONFIG_FILENAME
     if not config_path.exists():
         sys.exit('ERROR: no config exists. Run: brickset config API_KEY')
@@ -18,7 +18,7 @@ def get_config():
         return json.load(config_file)
 
 
-def configure(api_key):
+def configure(api_key: str) -> None:
     config_dir = _config_directory()
     if not config_dir.exists():
         config_dir.mkdir()
