@@ -15,7 +15,7 @@ def execute_api_request(api: str, include_hash: bool = False, **kwargs: Any) -> 
         if 'hash' not in brickset_config:
             sys.exit('ERROR: user hash required. Run: brickset login')
         params['userHash'] = brickset_config['hash']
-    for key, value in iter(kwargs.items()):
+    for key, value in kwargs.items():
         params[key] = str(value)  # important when value='params' but str everything anyway
 
     response = requests.get(_API + '/' + api, params=params)
