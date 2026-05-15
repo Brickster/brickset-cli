@@ -24,7 +24,7 @@ $ brickset login
 ## Running tests
 
 ```sh
-$ brew install pipx
+$ brew install pipx qlty
 $ pipx ensurepath
 $ pipx install nox
 $ nox
