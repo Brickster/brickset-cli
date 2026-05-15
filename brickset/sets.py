@@ -10,7 +10,7 @@ from . import cache
 @dataclass
 class SetFilters:
     query: str | None = None
-    id: str | None = None
+    set_id: str | None = None
     set_number: list[str] | None = None
     theme: list[str] | None = None
     subtheme: list[str] | None = None
@@ -76,7 +76,7 @@ def get_sets(filters: SetFilters, limit: int, order_by: str | None, extended: bo
 
     params: dict[str, Any] = {k: v for k, v in {
         'query': filters.query,
-        'setID': filters.id,
+        'setID': filters.set_id,
         'setNumber': ','.join(filters.set_number) if filters.set_number else None,
         'theme': ','.join(filters.theme) if filters.theme else None,
         'subtheme': ','.join(filters.subtheme) if filters.subtheme else None,
