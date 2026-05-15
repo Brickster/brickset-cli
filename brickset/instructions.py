@@ -135,21 +135,24 @@ def get_instructions(set_id: list[str] | None, directory: str | None, set_number
         if not cur_set_number:
             print(f'No instructions found for set ID {cur_set_id}')
             continue
-        instructions_json = api.execute_api_request('getInstructions', setID=cur_set_id)
-        if not instructions_json['instructions']:
-            print(f'No instructions found for {cur_set_number} ({cur_set_id})')
-            if directory:
-                with open(Path(directory) / f'{cur_set_number}_noinstructions.txt', 'wb'):
-                    pass
-            continue
+        _fetch_instructions(cur_set_id, cur_set_number, directory)
 
-        fetched = instructions_json['instructions']
+
+def _fetch_instructions(set_id: str, set_number: str, directory: str | None) -> None:
+    instructions_json = api.execute_api_request('getInstructions', setID=set_id)
+    fetched = instructions_json['instructions']
+    if not fetched:
+        print(f'No instructions found for {set_number} ({set_id})')
         if directory:
-            for i in fetched:
-                download_instruction(directory, cur_set_number, i)
-        else:
-            for i in fetched:
-                _print_instruction(cur_set_number, i)
+            with open(Path(directory) / f'{set_number}_noinstructions.txt', 'wb'):
+                pass
+        return
+    if directory:
+        for i in fetched:
+            download_instruction(directory, set_number, i)
+    else:
+        for i in fetched:
+            _print_instruction(set_number, i)
 
 
 def _print_instruction(set_number: str, instruction: dict[str, str]) -> None:
