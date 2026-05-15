@@ -72,3 +72,30 @@ class TestBrickset(unittest.TestCase):
         result = subprocess.run([_BIN, 'instructions', '50505-1', '1234'], capture_output=True, text=True)
         self.assertEqual(2, result.returncode)
         self.assertIn('must all be set IDs or all set numbers', result.stderr)
+
+    def test_collectionSets_positional_setNumber_isAccepted(self):
+        # Exit 2 is expected (no config → lookup returns nothing), but the error must come
+        # from our dispatch ("no set found"), not from argparse rejecting the argument.
+        result = subprocess.run([_BIN, 'collection', 'sets', '50505-1', '--owned'], capture_output=True, text=True)
+        self.assertIn('no set found for set number', result.stderr)
+
+    def test_collectionSets_positional_cannotCombineWithSetId(self):
+        result = subprocess.run(
+            [_BIN, 'collection', 'sets', '1234', '--set-id', '5678', '--owned'],
+            capture_output=True, text=True
+        )
+        self.assertEqual(2, result.returncode)
+        self.assertIn('cannot be combined', result.stderr)
+
+    def test_collectionSets_positional_cannotCombineWithSetNumber(self):
+        result = subprocess.run(
+            [_BIN, 'collection', 'sets', '50505-1', '--set-number', '60001-1', '--owned'],
+            capture_output=True, text=True
+        )
+        self.assertEqual(2, result.returncode)
+        self.assertIn('cannot be combined', result.stderr)
+
+    def test_collectionSets_requiresIdentifier(self):
+        result = subprocess.run([_BIN, 'collection', 'sets', '--owned'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('an identifier is required', result.stderr)
