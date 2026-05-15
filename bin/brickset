@@ -7,6 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from brickset import cache
 from brickset import config
 from brickset import instructions
 from brickset import minifigs
@@ -200,7 +201,13 @@ if __name__ == '__main__':
         description='manage a collection set',
         usage='''brickset collection sets TODO'''
     )
-    collection_sets_parser.add_argument('id', help='Brickset ID', metavar='ID')
+    collection_sets_parser.add_argument(
+        'identifier', nargs='?', metavar='ID',
+        help='Set ID or set number (auto-detected; use --set-id/--set-number to override)'
+    )
+    collection_sets_identifier_group = collection_sets_parser.add_mutually_exclusive_group()
+    collection_sets_identifier_group.add_argument('--set-id', help='Brickset set ID')
+    collection_sets_identifier_group.add_argument('--set-number', '--number', help='Set number')
     collection_sets_parser.add_argument(
         '--owned', '-o', nargs='?', default=None, const=1, help='quantity owned'
     )
@@ -211,9 +218,30 @@ if __name__ == '__main__':
     collection_sets_parser.add_argument('--rating', '-r', type=int, choices=range(0, 6), metavar='{0-5}', help='set rating (1-5, or 0 to unset)')
 
     def _validate_collection_sets(**kwargs):
+        identifier = kwargs.pop('identifier', None)
+        set_id = kwargs.pop('set_id', None)
+        set_number = kwargs.pop('set_number', None)
+
+        if identifier is not None:
+            if set_id or set_number:
+                collection_sets_parser.error('identifier cannot be combined with --set-id or --set-number')
+            if re.search(r'-\d+$', identifier):
+                set_number = identifier
+            else:
+                set_id = identifier
+
+        if not set_id and not set_number:
+            collection_sets_parser.error('an identifier is required (positional, --set-id, or --set-number)')
+
+        if set_number:
+            set_id = next(cache.set_number_to_id_generator([set_number]))
+            if not set_id:
+                collection_sets_parser.error(f'no set found for set number {set_number}')
+
         if all(kwargs.get(k) is None for k in ['owned', 'wanted', 'notes', 'rating']):
             collection_sets_parser.error('at least one of --owned, --wanted, --not-wanted, --notes, --rating is required')
-        sets.update_set(**kwargs)
+
+        sets.update_set(id=set_id, **kwargs)
 
     collection_sets_parser.set_defaults(func=_validate_collection_sets)
 
