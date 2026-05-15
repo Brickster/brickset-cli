@@ -1,4 +1,5 @@
 -r requirements.txt
+nox==2026.4.10
 mock==5.2.0
 parameterized==0.9.0
 pytest==9.0.3
