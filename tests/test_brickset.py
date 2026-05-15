@@ -49,3 +49,26 @@ class TestBrickset(unittest.TestCase):
         result = subprocess.run([_BIN, 'collection', 'minifigs', 'sw0001'], capture_output=True, text=True)
         self.assertEqual(2, result.returncode)
         self.assertIn('at least one of --owned, --wanted, --not-wanted is required', result.stderr)
+
+    def test_sets_positional_setNumber_isAccepted(self):
+        result = subprocess.run([_BIN, 'sets', '50505-1'], capture_output=True, text=True)
+        self.assertNotEqual(2, result.returncode)
+
+    def test_sets_positional_setId_isAccepted(self):
+        result = subprocess.run([_BIN, 'sets', '1234'], capture_output=True, text=True)
+        self.assertNotEqual(2, result.returncode)
+
+    def test_sets_positional_cannotCombineWithSetId(self):
+        result = subprocess.run([_BIN, 'sets', '1234', '--set-id', '5678'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('cannot be combined', result.stderr)
+
+    def test_sets_positional_cannotCombineWithSetNumber(self):
+        result = subprocess.run([_BIN, 'sets', '50505-1', '--set-number', '60001-1'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('cannot be combined', result.stderr)
+
+    def test_instructions_positional_mixedTypesError(self):
+        result = subprocess.run([_BIN, 'instructions', '50505-1', '1234'], capture_output=True, text=True)
+        self.assertEqual(2, result.returncode)
+        self.assertIn('must all be set IDs or all set numbers', result.stderr)

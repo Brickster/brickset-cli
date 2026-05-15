@@ -125,19 +125,19 @@ def _construct_instruction_filename(set_number: str, instruction_description: st
     return None
 
 
-def get_instructions(id: list[str] | None, directory: str | None, set_number: list[str] | None = None) -> None:
-    ids = id if id is not None else set_number_to_id_generator(set_number)  # type: ignore[arg-type]
-    set_numbers = set_number if set_number is not None else id_to_set_number_generator(id)  # type: ignore[arg-type]
-    for set_id, cur_set_number in zip(ids, set_numbers):
-        if not set_id:
+def get_instructions(set_id: list[str] | None, directory: str | None, set_number: list[str] | None = None) -> None:
+    ids = set_id if set_id is not None else set_number_to_id_generator(set_number)  # type: ignore[arg-type]
+    set_numbers = set_number if set_number is not None else id_to_set_number_generator(set_id)  # type: ignore[arg-type]
+    for cur_set_id, cur_set_number in zip(ids, set_numbers):
+        if not cur_set_id:
             print(f'No instructions found for set number {cur_set_number}')
             continue
         if not cur_set_number:
-            print(f'No instructions found for set ID {set_id}')
+            print(f'No instructions found for set ID {cur_set_id}')
             continue
-        instructions_json = api.execute_api_request('getInstructions', setID=set_id)
+        instructions_json = api.execute_api_request('getInstructions', setID=cur_set_id)
         if not instructions_json['instructions']:
-            print(f'No instructions found for {cur_set_number} ({set_id})')
+            print(f'No instructions found for {cur_set_number} ({cur_set_id})')
             if directory:
                 with open(Path(directory) / f'{cur_set_number}_noinstructions.txt', 'wb'):
                     pass

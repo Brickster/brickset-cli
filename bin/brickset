@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -59,8 +60,12 @@ if __name__ == '__main__':
     # ------------------------------------------
     sets_parser = subparsers.add_parser('sets', help='get sets', description='get sets')
 
+    sets_parser.add_argument(
+        'identifier', nargs='?', metavar='ID',
+        help='Set ID or set number (auto-detected; use --set-id/--set-number to override)'
+    )
     identifier_group = sets_parser.add_mutually_exclusive_group()
-    identifier_group.add_argument('--id', help='Brickset ID')
+    identifier_group.add_argument('--set-id', help='Brickset set ID')
     identifier_group.add_argument('--set-number', '--number', nargs='+', help='Set number')
     sets_parser.add_argument('--query', '-q', help='query set number, name, theme and subtheme')
     sets_parser.add_argument('--theme', nargs='+', help='Set theme')
@@ -83,6 +88,14 @@ if __name__ == '__main__':
     )
 
     def _dispatch_get_sets(**kwargs):
+        identifier = kwargs.pop('identifier', None)
+        if identifier is not None:
+            if kwargs.get('set_id') or kwargs.get('set_number'):
+                sets_parser.error('identifier cannot be combined with --set-id or --set-number')
+            if re.search(r'-\d+$', identifier):
+                kwargs['set_number'] = [identifier]
+            else:
+                kwargs['set_id'] = identifier
         filter_fields = sets.SetFilters.__dataclass_fields__
         filter_kwargs = {k: kwargs.pop(k) for k in list(filter_fields) if k in kwargs}
         if not any(filter_kwargs.values()):
@@ -110,11 +123,33 @@ if __name__ == '__main__':
     # INSTRUCTIONS
     # ------------------------------------------
     instructions_parser = subparsers.add_parser('instructions', help='get instructions', description='get instructions')
+    instructions_parser.add_argument(
+        'identifier', nargs='*', metavar='ID',
+        help='Set ID(s) or set number(s) (auto-detected; use --set-id/--set-number to override)'
+    )
     identifier_group = instructions_parser.add_mutually_exclusive_group()
-    identifier_group.add_argument('--id', nargs='+', help='Brickset ID')
+    identifier_group.add_argument('--set-id', nargs='+', help='Brickset set ID')
     identifier_group.add_argument('--set-number', '--number', nargs='+', help='Set number')
-    # instructions_parser.add_argument('id', nargs='+', help='Brickset ID')
-    instructions_parser.set_defaults(func=instructions.get_instructions)
+
+    def _dispatch_get_instructions(**kwargs):
+        identifiers = kwargs.pop('identifier', [])
+        if identifiers:
+            if kwargs.get('set_id') or kwargs.get('set_number'):
+                instructions_parser.error('identifier cannot be combined with --set-id or --set-number')
+            set_ids, set_numbers = [], []
+            for ident in identifiers:
+                (set_numbers if re.search(r'-\d+$', ident) else set_ids).append(ident)
+            if set_ids and set_numbers:
+                instructions_parser.error(
+                    'positional identifiers must all be set IDs or all set numbers; use flags to mix'
+                )
+            if set_ids:
+                kwargs['set_id'] = set_ids
+            else:
+                kwargs['set_number'] = set_numbers
+        instructions.get_instructions(**kwargs)
+
+    instructions_parser.set_defaults(func=_dispatch_get_instructions)
     instructions_parser.add_argument(
         '--download',
         '-d',
