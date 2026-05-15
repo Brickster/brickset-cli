@@ -1,11 +1,16 @@
 import json
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from brickset import config
 
 
 class TestConfig(unittest.TestCase):
+
+    def test_configDirectory_whenBricksetDirSet(self):
+        with mock.patch.dict('os.environ', {'BRICKSET_DIR': '/custom/path'}):
+            self.assertEqual(Path('/custom/path'), config._config_directory())
 
     @mock.patch('pathlib.Path.exists', return_value=True)
     def test_getConfig(self, mock_exists):

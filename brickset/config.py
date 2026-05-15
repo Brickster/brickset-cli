@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -7,6 +8,8 @@ _CONFIG_FILENAME = 'config'
 
 
 def _config_directory() -> Path:
+    if override := os.environ.get('BRICKSET_DIR'):
+        return Path(override)
     return Path.home() / _BRICKSET_DIRECTORY
 
 
