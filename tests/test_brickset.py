@@ -1,6 +1,9 @@
+import json
 import os
 import subprocess
+import tempfile
 import unittest
+from pathlib import Path
 
 _BIN = os.path.join(os.path.dirname(__file__), '..', 'bin', 'brickset')
 
@@ -74,10 +77,15 @@ class TestBrickset(unittest.TestCase):
         self.assertIn('must all be set IDs or all set numbers', result.stderr)
 
     def test_collectionSets_positional_setNumber_isAccepted(self):
-        # Exit 2 is expected (no config → lookup returns nothing), but the error must come
-        # from our dispatch ("no set found"), not from argparse rejecting the argument.
-        result = subprocess.run([_BIN, 'collection', 'sets', '50505-1', '--owned'], capture_output=True, text=True)
-        self.assertIn('no set found for set number', result.stderr)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, 'config').write_text(json.dumps({'api_key': 'fake', 'hash': 'fake'}))
+            Path(tmpdir, 'cache').write_text(json.dumps({'sets': {'50505-1': '99999', '99999': '50505-1'}}))
+            env = {**os.environ, 'BRICKSET_DIR': tmpdir}
+            result = subprocess.run(
+                [_BIN, 'collection', 'sets', '50505-1', '--owned'],
+                capture_output=True, text=True, env=env
+            )
+        self.assertNotEqual(2, result.returncode)
 
     def test_collectionSets_positional_cannotCombineWithSetId(self):
         result = subprocess.run(
