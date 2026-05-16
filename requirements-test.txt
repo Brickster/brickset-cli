@@ -6,5 +6,5 @@ pytest==9.0.3
 coverage==7.14.0
 flake8==7.3.0
 mypy==2.1.0
-types-requests==2.33.0.20260508
+types-requests==2.33.0.20260513
 types-pytz==2026.2.0.20260506
