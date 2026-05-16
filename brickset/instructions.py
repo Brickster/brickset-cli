@@ -144,8 +144,8 @@ def _fetch_instructions(set_id: str, set_number: str, directory: str | None) -> 
     if not fetched:
         print(f'No instructions found for {set_number} ({set_id})')
         if directory:
-            with open(Path(directory) / f'{set_number}_noinstructions.txt', 'wb'):
-                pass
+            with open(Path(directory) / f'{set_number}_noinstructions.txt', 'wb') as f:
+                f.write(b'')
         return
     if directory:
         for i in fetched:
@@ -166,6 +166,6 @@ def download_instruction(directory: str, set_number: str, instruction: dict[str,
         print(f'WARN: Skipping unknown instruction format: "{instruction["description"]}" {url}')
         return
     print(f'Downloading "{instruction["description"]}" {url} as {filename}')
-    r = requests.get(url)
+    r = requests.get(url, timeout=30)
     with open(Path(directory) / filename, 'wb') as f:
         f.write(r.content)

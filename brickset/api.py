@@ -18,7 +18,7 @@ def execute_api_request(api: str, include_hash: bool = False, **kwargs: Any) -> 
     for key, value in kwargs.items():
         params[key] = str(value)  # important when value='params' but str everything anyway
 
-    response = requests.get(f'{_API}/{api}', params=params)
+    response = requests.get(f'{_API}/{api}', params=params, timeout=30)
     if response.status_code != 200:
         print(response.text)
         sys.exit(f'ERROR: {api} API returned an unexpected error')

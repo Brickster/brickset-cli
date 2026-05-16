@@ -16,7 +16,8 @@ class TestApi(unittest.TestCase):
 
         mock_get.assert_called_once_with(
             'https://brickset.com/api/v3.asmx/getSets',
-            params={'apiKey': 'test-key'}
+            params={'apiKey': 'test-key'},
+            timeout=30
         )
         self.assertEqual({'status': 'success', 'sets': []}, result)
 
@@ -30,7 +31,8 @@ class TestApi(unittest.TestCase):
 
         mock_get.assert_called_once_with(
             'https://brickset.com/api/v3.asmx/getSets',
-            params={'apiKey': 'test-key', 'setID': '123'}
+            params={'apiKey': 'test-key', 'setID': '123'},
+            timeout=30
         )
 
     @mock.patch('brickset.api.requests.get')
@@ -43,7 +45,8 @@ class TestApi(unittest.TestCase):
 
         mock_get.assert_called_once_with(
             'https://brickset.com/api/v3.asmx/getSets',
-            params={'apiKey': 'test-key', 'userHash': 'user-hash'}
+            params={'apiKey': 'test-key', 'userHash': 'user-hash'},
+            timeout=30
         )
 
     @mock.patch('brickset.api.config.get_config', return_value={'api_key': 'test-key'})

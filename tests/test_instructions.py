@@ -22,7 +22,7 @@ class TestInstructions(unittest.TestCase):
         with mock.patch('builtins.open', mock.mock_open()) as mock_open:
             download_instruction('/tmp', '1234-1', instruction)
 
-        mock_get.assert_called_once_with('https://www.lego.com/cdn/5678.pdf')
+        mock_get.assert_called_once_with('https://www.lego.com/cdn/5678.pdf', timeout=30)
         mock_print.assert_called_once_with(
             'Downloading "BI 3017 / 32 - 70704 V39" https://www.lego.com/cdn/5678.pdf as 1234-1_v39_5678.pdf'
         )
