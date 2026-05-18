@@ -19,9 +19,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
@@ -40,7 +42,7 @@ jobs:
       run: nox -s tests
 
     - name: Upload coverage report
-      uses: qltysh/qlty-action/coverage@v2
+      uses: qltysh/qlty-action/coverage@a19242102d17e497f437d7466aa01b528537e899 # v2
       with:
         token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
         files: coverage.lcov
