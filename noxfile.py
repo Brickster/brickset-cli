@@ -1,5 +1,3 @@
-import os
-
 import nox
 
 PYTHON = "3.10"
@@ -7,16 +5,8 @@ PYTHON = "3.10"
 
 @nox.session(python=False)
 def quality(session):
-    if os.environ.get('CI'):
-        session.skip('skipping qlty in CI')
-    session.run('qlty', 'check', external=True)
-
-
-@nox.session(python=PYTHON)
-def lint(session):
-    session.install("flake8")
-    session.run("flake8", ".", "--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics")
-    session.run("flake8", ".", "--count", "--exit-zero", "--max-complexity=10", "--statistics")
+    # For a full check, run: nox -s quality -- --all
+    session.run('qlty', 'check', *session.posargs, external=True)
 
 
 @nox.session(python=PYTHON)

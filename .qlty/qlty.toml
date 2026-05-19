@@ -31,9 +31,6 @@ name = "actionlint"
 name = "bandit"
 
 [[plugin]]
-name = "flake8"
-
-[[plugin]]
 name = "osv-scanner"
 
 [[plugin]]
