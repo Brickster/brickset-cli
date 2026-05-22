@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import hashlib
 import re
 import requests
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 
 from . import api
 from .cache import id_to_set_number_generator, set_number_to_id_generator
@@ -38,7 +40,7 @@ def _clean_region(region_to_clean: str) -> str:
     return result.lower()
 
 
-_RuleHandler = Callable[[str, str | None, re.Match[str], str], str]
+_RuleHandler = Callable[[str, Optional[str], re.Match[str], str], str]
 _RULES: list[tuple[re.Pattern[str], _RuleHandler]] = []
 
 

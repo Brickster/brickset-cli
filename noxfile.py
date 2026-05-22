@@ -15,7 +15,7 @@ def typecheck(session):
     session.run("mypy", "brickset/")
 
 
-@nox.session(python=PYTHON)
+@nox.session
 def tests(session):
     session.install("-r", "requirements-test.txt")
     session.run("coverage", "run", "-m", "pytest", "-v", *session.posargs)
@@ -23,6 +23,6 @@ def tests(session):
     session.run("coverage", "report")
 
 
-@nox.session(python=PYTHON, default=False)
+@nox.session(default=False)
 def test(session):
     tests(session)
